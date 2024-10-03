@@ -1,122 +1,85 @@
 import 'package:flutter/material.dart';
 import 'user_profile_screen.dart';
 import 'login_screen.dart';
+import 'EditProfileScreen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class User {
-  final String memId;
-  final String? memPhoto;
+  final String memId; // Add this property
   final String memName;
   final String memMobileNo;
-  final String? collRollNo;
-  final String? catCode;
-  final String? collSec;
-  final String? yrOfPass;
   final String? fName;
   final String? mName;
   final String? preAddr;
-  final String? preDiv;
-  final String? preDist;
-  final String? preThana;
   final String? prePhone;
   final String? preEmail;
   final String? perAddr;
-  final String? perDiv;
-  final String? perDist;
-  final String? perThana;
-  final String? profCode;
-  final String? designation;
+  final String? perPhone;
+  final String? perEmail;
   final String? officeName;
   final String? offAddr;
-  final String? offDiv;
-  final String? offDist;
-  final String? offThana;
   final String? offPhone;
   final String? offEmail;
-  final String? memType;
   final String? dob;
-  final String? dom;
-  final String? lmNo;
+  final String? designation;
+  final String? memPhoto; // Add this property
+  final String? collRollNo; // Add this property
+  final String? yrOfPass; // Add this property
 
   User({
-    required this.memId,
-    this.memPhoto,
+    required this.memId, // Update constructor
     required this.memName,
     required this.memMobileNo,
-    this.collRollNo,
-    this.catCode,
-    this.collSec,
-    this.yrOfPass,
     this.fName,
     this.mName,
     this.preAddr,
-    this.preDiv,
-    this.preDist,
-    this.preThana,
     this.prePhone,
     this.preEmail,
     this.perAddr,
-    this.perDiv,
-    this.perDist,
-    this.perThana,
-    this.profCode,
-    this.designation,
+    this.perPhone,
+    this.perEmail,
     this.officeName,
     this.offAddr,
-    this.offDiv,
-    this.offDist,
-    this.offThana,
     this.offPhone,
     this.offEmail,
-    this.memType,
     this.dob,
-    this.dom,
-    this.lmNo,
+    this.designation,
+    this.memPhoto,
+    this.collRollNo,
+    this.yrOfPass,
   });
 
-  // Factory method to create a User object from JSON
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      memId: json['MEM_ID'] ?? '',
-      memPhoto: json['MEM_PHOTO']?.toString(),
+      memId: json['MEM_ID'] ?? '', // Ensure to include this in the factory
+      memPhoto: json['MEM_PHOTO']?.toString(), // Include this in the factory
       memName: json['MEM_NAME'] ?? '',
       memMobileNo: json['MEM_MOBILE_NO'] ?? '',
-      collRollNo: json['COLL_ROLL_NO'],
-      catCode: json['CAT_CODE'],
-      collSec: json['COLL_SEC'],
-      yrOfPass: json['YR_OF_PASS'],
       fName: json['F_NAME'],
       mName: json['M_NAME'],
       preAddr: json['PRE_ADDR'],
-      preDiv: json['PRE_DIV'],
-      preDist: json['PRE_DIST'],
-      preThana: json['PRE_THANA'],
       prePhone: json['PRE_PHONE'],
       preEmail: json['PRE_EMAIL'],
       perAddr: json['PER_ADDR'],
-      perDiv: json['PER_DIV'],
-      perDist: json['PER_DIST'],
-      perThana: json['PER_THANA'],
-      profCode: json['PROF_CODE'],
-      designation: json['DESIGNATION'],
+      perPhone: json['PER_PHONE'],
+      perEmail: json['PER_EMAIL'],
       officeName: json['OFFICE_NAME'],
       offAddr: json['OFF_ADDR'],
-      offDiv: json['OFF_DIV'],
-      offDist: json['OFF_DIST'],
-      offThana: json['OFF_THANA'],
       offPhone: json['OFF_PHONE'],
       offEmail: json['OFF_EMAIL'],
-      memType: json['MEM_TYPE'],
       dob: json['DOB'],
-      dom: json['DOM'],
-      lmNo: json['LM_NO'],
+      designation: json['DESIGNATION'],
+      collRollNo: json['COLL_ROLL_NO'],
+      yrOfPass: json['YR_OF_PASS'],
     );
   }
 }
 
 class HomeScreen extends StatefulWidget {
-  final Map<String, String> user; // User data map
+  final Map<String, String> user;
 
   const HomeScreen({Key? key, required this.user}) : super(key: key);
 
@@ -126,13 +89,19 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
-  List<User> userList = []; // List to hold User objects
-  List<User> filteredUserList = []; // List to hold filtered User objects
+  List<User> userList = [];
+  List<User> filteredUserList = [];
+  int _currentIndex = 1;
+  bool _isLoading = true;
+
+  // Store the logged-in user info
+  User? loggedInUser;
 
   @override
   void initState() {
     super.initState();
-    _fetchUserList(); // Fetch user list when the widget is initialized
+    _fetchUserList();
+    _getLoggedInUserData(); // Fetch logged-in user data
   }
 
   Future<void> _fetchUserList() async {
@@ -140,40 +109,46 @@ class _HomeScreenState extends State<HomeScreen> {
       final response = await http.get(Uri.parse('http://103.106.118.10/ndc90_api/userdata.php'));
 
       if (response.statusCode == 200) {
-        final rawString = response.body;
-
-        // Clean up the response to convert it into a valid JSON string
-        String jsonString = _convertResponseToJson(rawString);
-
-        final List<dynamic> data = json.decode(jsonString);
-
+        final List<dynamic> data = json.decode(response.body);
         setState(() {
-          userList = data.map((json) => User.fromJson(json)).toList(); // Parse JSON to User list
-          filteredUserList = userList; // Initialize filtered list
+          userList = data.map((json) => User.fromJson(json)).toList();
+          filteredUserList = userList; // Initialize with all users
+          _isLoading = false; // Set loading to false after data is fetched
         });
       } else {
         print('Failed to load user data: ${response.statusCode}');
+        setState(() {
+          _isLoading = false; // Set loading to false on error
+        });
       }
     } catch (e) {
       print('Error fetching user data: $e');
+      setState(() {
+        _isLoading = false; // Set loading to false on error
+      });
     }
   }
 
-  String _convertResponseToJson(String rawString) {
-    // Replace 'Array' and unnecessary symbols to make it JSON-like
-    String jsonString = rawString
-        .replaceAllMapped(RegExp(r'\[([A-Za-z0-9_]+)\]'), (match) => '"${match[1]}":') // Replace [KEY] with "KEY":
-        .replaceAllMapped(RegExp(r'=>'), (match) => ':') // Replace => with :
-        .replaceAll(RegExp(r'(\r\n|\r|\n|\s+|\(|\))'), '') // Remove newlines, spaces, (), etc.
-        .replaceAll('OCILobObject', 'null'); // Replace OCILob Object with null
+  // Fetch the logged-in user's data from SharedPreferences
+  // Fetch the logged-in user's data from SharedPreferences
+  void _getLoggedInUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      loggedInUser = User(
+        memId: prefs.getString('memId') ?? '',
+        memName: prefs.getString('memName') ?? '',
+        memMobileNo: prefs.getString('memMobileNo') ?? '',
+        memPhoto: prefs.getString('memPhoto'),
+        collRollNo: prefs.getString('collRollNo'),
+        yrOfPass: prefs.getString('yrOfPass'),
+      );
+    });
 
-    // Wrap with { } to create a valid JSON string if necessary
-    if (!jsonString.startsWith('{')) {
-      jsonString = '{$jsonString}';
-    }
+    // Debugging
+    print('Saved User Data: ${prefs.getString('memId')}, ${prefs.getString('memName')}, ${prefs.getString('memMobileNo')}');
 
-    return jsonString;
   }
+
 
   void _filterUsers(String query) {
     setState(() {
@@ -193,14 +168,14 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: <Widget>[
           TextButton(
             onPressed: () {
-              Navigator.of(ctx).pop(); // Close the dialog
+              Navigator.of(ctx).pop();
             },
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
-              Navigator.of(ctx).pop(); // Close the dialog
-              _logout(); // Call the logout function
+              Navigator.of(ctx).pop();
+              _logout();
             },
             child: const Text('OK'),
           ),
@@ -209,7 +184,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _logout() {
+  Future<void> _logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('phone');
+    await prefs.remove('password');
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -218,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<bool> _onWillPop() async {
     _showLogoutDialog();
-    return false; // Prevent the default back button behavior
+    return false;
   }
 
   @override
@@ -236,9 +215,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         body: Padding(
           padding: const EdgeInsets.all(20.0),
-          child: Column(
+          child: _isLoading // Show CircularProgressIndicator when loading
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
             children: <Widget>[
-              // Search Bar
               TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
@@ -248,34 +228,96 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                onChanged: _filterUsers, // Call the filter method on text change
+                onChanged: _filterUsers,
               ),
               const SizedBox(height: 20),
-              // User List
               Expanded(
-                child: filteredUserList.isNotEmpty
-                    ? ListView.builder(
+                child: filteredUserList.isEmpty
+                    ? const Center(child: Text('No members found.'))
+                    : ListView.builder(
                   itemCount: filteredUserList.length,
                   itemBuilder: (context, index) {
                     User user = filteredUserList[index];
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 8.0),
                       child: ListTile(
-                        title: Text(user.memName),
-                        subtitle: Text(user.memMobileNo),
+                        leading: user.memPhoto != null
+                            ? CircleAvatar(
+                          backgroundImage:
+                          NetworkImage(user.memPhoto!),
+                          radius: 25,
+                        )
+                            : const CircleAvatar(
+                          child: Icon(Icons.person),
+                          radius: 25,
+                        ),
+                        title: Row(
+                          mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(child: Text(user.memName)),
+                            const Icon(Icons.arrow_forward),
+                          ],
+                        ),
+                        subtitle: GestureDetector(
+                          onTap: () async {
+                            final Uri launchUri = Uri(
+                              scheme: 'tel',
+                              path: user.memMobileNo,
+                            );
+                            await launch(launchUri.toString());
+                          },
+                          child: Text(
+                            user.memMobileNo,
+                            style:
+                            const TextStyle(color: Colors.blue),
+                          ),
+                        ),
                         onTap: () {
-                          // Handle tap event to navigate or show user details
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  UserProfileScreen(user: user),
+                            ),
+                          );
                         },
                       ),
                     );
                   },
-                )
-                    : const Center(
-                  child: Text('No members found.'),
                 ),
               ),
             ],
           ),
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          items: const [
+            BottomNavigationBarItem(
+                icon: Icon(Icons.photo_album), label: 'Gallery'),
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          ],
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index;
+              if (index == 2) {
+                // Navigate to EditProfileScreen only if loggedInUser is not null
+                if (loggedInUser != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditProfileScreen(user: loggedInUser!),
+                    ),
+                  );
+                } else {
+                  // Optionally show an error message or redirect to the login screen
+                  print('No logged-in user data available.');
+                }
+              }
+
+            });
+          },
         ),
       ),
     );

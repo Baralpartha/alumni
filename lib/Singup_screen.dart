@@ -21,6 +21,16 @@ class _SignupScreenState extends State<SignupScreen> {
   final _passwordController = TextEditingController();
   final _retypePasswordController = TextEditingController();
 
+  // Focus nodes to control the focus of text fields
+  final _phoneFocusNode = FocusNode();
+  final _emailFocusNode = FocusNode();
+  final _rollNumberFocusNode = FocusNode();
+  final _categoryFocusNode = FocusNode();
+  final _yearOfPassFocusNode = FocusNode();
+  final _designationFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
+  final _retypePasswordFocusNode = FocusNode();
+
   // Variables to control password visibility
   bool _isPasswordVisible = false;
   bool _isRetypePasswordVisible = false;
@@ -35,15 +45,16 @@ class _SignupScreenState extends State<SignupScreen> {
   }; // Dropdown options with corresponding codes
 
   Future<void> _signup() async {
-    String username = _usernameController.text;
-    String phoneNumber = _phoneController.text;
-    String email = _emailController.text;
-    String rollNumber = _rollNumberController.text;
-    String catCode = _categories[_selectedCategory] ?? ''; // Get the selected category code
-    String yearOfPass = _yearOfPassController.text;
-    String designation = _designationController.text;
-    String password = _passwordController.text;
-    String retypePassword = _retypePasswordController.text;
+    String username = _usernameController.text.trim();
+    String phoneNumber = _phoneController.text.trim();
+    String email = _emailController.text.trim();
+    String rollNumber = _rollNumberController.text.trim();
+    String catCode = _categories[_selectedCategory] ??
+        ''; // Get the selected category code
+    String yearOfPass = _yearOfPassController.text.trim();
+    String designation = _designationController.text.trim();
+    String password = _passwordController.text.trim();
+    String retypePassword = _retypePasswordController.text.trim();
 
     // Validate input
     if (username.isEmpty ||
@@ -79,7 +90,8 @@ class _SignupScreenState extends State<SignupScreen> {
     // Make the API request
     try {
       final response = await http.post(
-        Uri.parse('http://103.106.118.10/ndc90_api/singup.php'), // Update this with your API endpoint
+        Uri.parse('http://103.106.118.10/ndc90_api/singup.php'),
+        // Update this with your API endpoint
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'action': 'signup', // Include action
@@ -117,6 +129,13 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
+  void _handleKeyPress(FocusNode nextFocusNode, String text) {
+    if (text.isEmpty) {
+      nextFocusNode
+          .requestFocus(); // Move focus to the next field if current text is empty
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -132,10 +151,8 @@ class _SignupScreenState extends State<SignupScreen> {
               child: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.black),
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginScreen()),
-                  );
+                  Navigator.pop(
+                      context); // Navigate back to the previous screen
                 },
               ),
             ),
@@ -159,6 +176,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
+              onChanged: (text) => _handleKeyPress(_phoneFocusNode, text),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -170,6 +188,8 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ),
               keyboardType: TextInputType.phone,
+              focusNode: _phoneFocusNode,
+              onChanged: (text) => _handleKeyPress(_emailFocusNode, text),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -180,6 +200,8 @@ class _SignupScreenState extends State<SignupScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
+              focusNode: _emailFocusNode,
+              onChanged: (text) => _handleKeyPress(_rollNumberFocusNode, text),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -190,6 +212,8 @@ class _SignupScreenState extends State<SignupScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
+              focusNode: _rollNumberFocusNode,
+              onChanged: (text) => _handleKeyPress(_categoryFocusNode, text),
             ),
             const SizedBox(height: 20),
             DropdownButtonFormField<String>(
@@ -211,7 +235,10 @@ class _SignupScreenState extends State<SignupScreen> {
                   _selectedCategory = newValue;
                 });
               },
-              validator: (value) => value == null ? 'Please select a category' : null,
+              validator: (value) =>
+              value == null
+                  ? 'Please select a category'
+                  : null,
             ),
             const SizedBox(height: 20),
             TextField(
@@ -223,6 +250,8 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ),
               keyboardType: TextInputType.number,
+              focusNode: _yearOfPassFocusNode,
+              onChanged: (text) => _handleKeyPress(_designationFocusNode, text),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -233,6 +262,8 @@ class _SignupScreenState extends State<SignupScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
+              focusNode: _designationFocusNode,
+              onChanged: (text) => _handleKeyPress(_passwordFocusNode, text),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -245,7 +276,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 suffixIcon: IconButton(
                   icon: Icon(
-                    _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    _isPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
                   ),
                   onPressed: () {
                     setState(() {
@@ -254,6 +287,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   },
                 ),
               ),
+              focusNode: _passwordFocusNode,
+              onChanged: (text) =>
+                  _handleKeyPress(_retypePasswordFocusNode, text),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -266,7 +302,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 suffixIcon: IconButton(
                   icon: Icon(
-                    _isRetypePasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    _isRetypePasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
                   ),
                   onPressed: () {
                     setState(() {
@@ -275,24 +313,20 @@ class _SignupScreenState extends State<SignupScreen> {
                   },
                 ),
               ),
+              focusNode: _retypePasswordFocusNode,
+              onChanged: (text) {
+                _handleKeyPress(FocusNode(),
+                    text); // Focus change logic can be applied here too if needed
+              },
             ),
             const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _signup, // Call the signup function
-                child: const Text('Continue'),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.purple,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
+            ElevatedButton(
+              onPressed: _signup,
+              child: const Text('Sign Up'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
               ),
             ),
-            const SizedBox(height: 40),
           ],
         ),
       ),

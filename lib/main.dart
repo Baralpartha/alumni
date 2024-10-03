@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:alumni/carousel_screen.dart';
 import 'package:http/http.dart' as http;
 
-import 'carousel_slider.dart';
-
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,3 +21,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+

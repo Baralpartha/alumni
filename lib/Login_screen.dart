@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'user_profile_screen.dart'; // Import the UserProfileScreen
-import 'Home_screen.dart'; // Import the HomeScreen
+import 'Home_screen.dart';
+import 'Singup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -29,18 +29,17 @@ class _LoginScreenState extends State<LoginScreen> {
     String? savedPhone = prefs.getString('phone');
     String? savedPassword = prefs.getString('password');
 
-    if (savedPhone != null) {
+
+    if (savedPhone != null && savedPassword != null) {
       _phoneController.text = savedPhone;
-    }
-    if (savedPassword != null) {
       _passwordController.text = savedPassword;
+
+      // No longer automatically logging in
     }
   }
 
-  Future<void> _loginUser() async {
-    final String phone = _phoneController.text.trim();
-    final String password = _passwordController.text.trim();
 
+  Future<void> _loginUser(String phone, String password) async {
     if (phone.isEmpty || password.isEmpty) {
       _showErrorDialog('Phone number and password are required.');
       return;
@@ -60,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
         },
         body: jsonEncode(<String, String>{
           'action': 'login',
-          'mobileNo': phone,
+          'MEM_MOBILE_NO': phone,
           'userPass': password,
         }),
       );
@@ -79,11 +78,17 @@ class _LoginScreenState extends State<LoginScreen> {
           String memMobileNo = data['user']['mem_mobile_no']?.toString() ?? 'Unknown Mobile';
           String collRollNo = data['user']['coll_roll_no']?.toString() ?? 'Unknown Roll No';
           String? memPhoto = data['user']['mem_photo'];
+          final pref=await SharedPreferences.getInstance();
+          pref.setString("userphone",memMobileNo);
+          pref.setString("username",username);
+          pref.setString("usercollrollname",collRollNo);
+          pref.setString("usermemphoto",memPhoto!);
+
 
           // Save credentials if successful
           await _saveCredentials(phone, password);
 
-          // Navigate to HomeScreen with user data and username
+          // Navigate to HomeScreen with user data
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -93,7 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   'memId': memId,
                   'phone': memMobileNo,
                   'collRollNo': collRollNo,
-                  'memPhoto': memPhoto ?? '', // Default to empty string if null
+                  'memPhoto': memPhoto ?? '',
                 },
               ),
             ),
@@ -126,6 +131,31 @@ class _LoginScreenState extends State<LoginScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text('Error'),
         content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToSignUp() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SignupScreen()),
+    );
+  }
+
+  void _forgotPassword() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Forgot Password'),
+        content: const Text('Instructions to reset your password have been sent to your registered email.'),
         actions: <Widget>[
           TextButton(
             onPressed: () {
@@ -205,7 +235,10 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isLoading ? null : _loginUser,
+                onPressed: _isLoading ? null : () {
+                  // Call _loginUser with input from fields
+                  _loginUser(_phoneController.text.trim(), _passwordController.text.trim());
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
@@ -220,6 +253,29 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 20),
+            TextButton(
+              onPressed: _forgotPassword,
+              child: const Text(
+                'Forgot Password?',
+                style: TextStyle(color: Colors.blue),
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _navigateToSignUp,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text('Sign Up'),
+              ),
+            ),
             const SizedBox(height: 40),
           ],
         ),
