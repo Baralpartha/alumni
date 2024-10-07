@@ -28,7 +28,7 @@ class _CarouselScreenState extends State<CarouselScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Alumni', style: TextStyle(color: Colors.black)),
+        title: const Text('Alapon-NDC90', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -45,7 +45,7 @@ class _CarouselScreenState extends State<CarouselScreen> {
           // Carousel Slider
           CarouselSlider(
             options: CarouselOptions(
-              height: 250.0,
+              height:520.0,
               autoPlay: true,
               autoPlayInterval: Duration(seconds: 3),
               enlargeCenterPage: true,
@@ -53,9 +53,9 @@ class _CarouselScreenState extends State<CarouselScreen> {
               aspectRatio: 16 / 9,
             ),
             items: [
-              _carouselItem('assets/images/abb.png', 'Explore Opportunities', 'Join our network and grow.'),
-              _carouselItem('assets/images/abb.png', 'Stay Connected', 'Be a part of our alumni community.'),
-              _carouselItem('assets/images/hic.jpg', 'Alumni Events', 'Participate in exclusive events.'),
+              _carouselItem('assets/images/slider1.png', 'Explore Opportunities', 'Join our network and grow.'),
+              _carouselItem('assets/images/slidera.jpg', 'Stay Connected', 'Be a part of our alumni community.'),
+
             ],
           ),
           const Spacer(),
@@ -77,7 +77,7 @@ class _CarouselScreenState extends State<CarouselScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
         ],
       ),
     );

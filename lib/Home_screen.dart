@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:typed_data'; // for handling binary data
 
 class User {
   final String memId; // Add this property
@@ -27,7 +28,19 @@ class User {
   final String? designation;
   final String? memPhoto; // Add this property
   final String? collRollNo; // Add this property
-  final String? yrOfPass; // Add this property
+  final String? yrOfPass;
+  final String? catCode; // Add this property
+  final String? collSec; // New property
+  final String? dom; // New property
+  final String? preDiv; // New property
+  final String? preDist; // New property
+  final String? preThana; // New property
+  final String? perDist; // New property
+  final String? perThana; // New property
+  final String? profCode; // New property
+  final String? prePostCode; // New property
+  final String? memType;
+  final String? perDiv;// New property
 
   User({
     required this.memId, // Update constructor
@@ -50,6 +63,19 @@ class User {
     this.memPhoto,
     this.collRollNo,
     this.yrOfPass,
+    this.catCode,
+    this.collSec, // Initialize new property
+    this.dom, // Initialize new property
+    this.preDiv, // Initialize new property
+    this.preDist, // Initialize new property
+    this.preThana, // Initialize new property
+    this.perDist, // Initialize new property
+    this.perThana, // Initialize new property
+    this.profCode, // Initialize new property
+    this.prePostCode, // Initialize new property
+    this.perDiv,
+    this.memType,
+    // Initialize new property
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -130,7 +156,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // Fetch the logged-in user's data from SharedPreferences
-  // Fetch the logged-in user's data from SharedPreferences
   void _getLoggedInUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -146,9 +171,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Debugging
     print('Saved User Data: ${prefs.getString('memId')}, ${prefs.getString('memName')}, ${prefs.getString('memMobileNo')}');
-
   }
 
+  String fixBase64(String base64) {
+    if (base64.contains(',')) {
+      base64 = base64.split(',').last; // Removes 'data:image/jpeg;base64,' if present
+    }
+    base64 = base64.replaceAll(RegExp(r'\s+'), ''); // Remove whitespaces
+
+    // Ensure valid Base64 string length
+    int padding = base64.length % 4;
+    if (padding != 0) {
+      base64 += '=' * (4 - padding);
+    }
+    return base64;
+  }
+
+  Uint8List? decodeBase64(String base64) {
+    try {
+      return base64Decode(base64);
+    } catch (e) {
+      print('Error decoding Base64: $e');
+      return null; // Return null if decoding fails
+    }
+  }
 
   void _filterUsers(String query) {
     setState(() {
@@ -186,8 +232,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _logout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('phone');
-    await prefs.remove('password');
+    //await prefs.remove('phone');
+    //await prefs.remove('password');
 
     Navigator.pushReplacement(
       context,
@@ -196,8 +242,31 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<bool> _onWillPop() async {
-    _showLogoutDialog();
+    //_showLogoutDialog();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+    );
     return false;
+  }
+
+  // Helper function to build user avatar
+  Widget _buildUserAvatar(String base64Image) {
+    try {
+      // Fix and decode the Base64 string
+      Uint8List? decodedImage = decodeBase64(fixBase64(base64Image));
+
+      if (decodedImage != null) {
+        return CircleAvatar(
+          backgroundImage: MemoryImage(decodedImage),
+        );
+      } else {
+        return const CircleAvatar(child: Icon(Icons.person)); // Fallback if decoding fails
+      }
+    } catch (e) {
+      print('Error decoding image: $e');
+      return const CircleAvatar(child: Icon(Icons.person)); // Fallback in case of any errors
+    }
   }
 
   @override
@@ -210,7 +279,13 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: Colors.greenAccent,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: _showLogoutDialog,
+            //onPressed: _showLogoutDialog,
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+              );
+            },
           ),
         ),
         body: Padding(
@@ -234,58 +309,43 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: filteredUserList.isEmpty
                     ? const Center(child: Text('No members found.'))
-                    : ListView.builder(
+                :ListView.builder(
                   itemCount: filteredUserList.length,
                   itemBuilder: (context, index) {
                     User user = filteredUserList[index];
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 8.0),
                       child: ListTile(
-                        leading: user.memPhoto != null
-                            ? CircleAvatar(
-                          backgroundImage:
-                          NetworkImage(user.memPhoto!),
-                          radius: 25,
-                        )
-                            : const CircleAvatar(
-                          child: Icon(Icons.person),
-                          radius: 25,
-                        ),
-                        title: Row(
-                          mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(child: Text(user.memName)),
-                            const Icon(Icons.arrow_forward),
-                          ],
-                        ),
-                        subtitle: GestureDetector(
-                          onTap: () async {
-                            final Uri launchUri = Uri(
-                              scheme: 'tel',
-                              path: user.memMobileNo,
-                            );
-                            await launch(launchUri.toString());
+                        leading: user.memPhoto != null && user.memPhoto!.isNotEmpty
+                            ? _buildUserAvatar(user.memPhoto!)
+                            : const CircleAvatar(child: Icon(Icons.person)),
+                        title: Text(user.memName),
+                        subtitle: Text(user.memMobileNo),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.call), // Call icon
+                          onPressed: () async {
+                            // Launch the phone dialer
+                            final phoneUrl = 'tel:${user.memMobileNo}';
+                            if (await canLaunch(phoneUrl)) {
+                              await launch(phoneUrl);
+                            } else {
+                              throw 'Could not launch $phoneUrl';
+                            }
                           },
-                          child: Text(
-                            user.memMobileNo,
-                            style:
-                            const TextStyle(color: Colors.blue),
-                          ),
                         ),
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  UserProfileScreen(user: user),
+                              builder: (context) => UserProfileScreen(user: user),
                             ),
                           );
                         },
                       ),
                     );
                   },
-                ),
+                )
+
               ),
             ],
           ),
@@ -308,14 +368,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => EditProfileScreen(user: loggedInUser!),
+
                     ),
                   );
                 } else {
                   // Optionally show an error message or redirect to the login screen
+
                   print('No logged-in user data available.');
                 }
               }
-
             });
           },
         ),

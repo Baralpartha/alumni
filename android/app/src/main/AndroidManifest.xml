@@ -1,9 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Required to allow the app to access the internet -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-        android:label="alumni"
+        android:label="Alapon-NDC90"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
