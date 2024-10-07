@@ -215,6 +215,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     // Construct the updated user data
     final updatedUserData = {
       'mem_id': memId, // Include mem_id
+      'action': "update",
       'mem_photo': memPhotoBase64, // Include base64 image data
       'mem_name': _nameController.text,
       'mem_mobile_no': _mobileController.text,
