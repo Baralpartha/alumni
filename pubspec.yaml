@@ -33,11 +33,11 @@ flutter:
   # Adding assets
   assets:
     - assets/images/hic.jpg
-    - assets/images/abb.png
-    - assets/images/nclogo.jpg
-    - assets/images/itbnagla.jpg
     - assets/images/slider1.png
     - assets/images/slidera.jpg
+    - assets/images/ndccc.png
+    - assets/images/logooo.png
+
 
 
 

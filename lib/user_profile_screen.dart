@@ -13,26 +13,15 @@ class UserProfileScreen extends StatefulWidget {
   _UserProfileScreenState createState() => _UserProfileScreenState();
 }
 
-class _UserProfileScreenState extends State<UserProfileScreen> {
+class _UserProfileScreenState extends State<UserProfileScreen> with SingleTickerProviderStateMixin {
   late User _user;
-  // Create TextEditingControllers for each field to allow editing
-  late TextEditingController _mobileController;
-  late TextEditingController _fatherNameController;
-  late TextEditingController _motherNameController;
-  late TextEditingController _designationController;
-  late TextEditingController _officeNameController;
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _user = widget.user; // Initialize with the user passed from the previous screen
-
-    // Initialize controllers with current user data
-    _mobileController = TextEditingController(text: _user.memMobileNo);
-    _fatherNameController = TextEditingController(text: _user.fName);
-    _motherNameController = TextEditingController(text: _user.mName);
-    _designationController = TextEditingController(text: _user.designation);
-    _officeNameController = TextEditingController(text: _user.officeName);
+    _tabController = TabController(length: 3, vsync: this); // Three tabs for addresses
   }
 
   // Function to decode Base64 string
@@ -82,7 +71,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Center( // Centering the username
+                      Center(
                         child: Text(
                           _user.memName ?? "N/A",
                           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -90,15 +79,77 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       ),
                       const SizedBox(height: 20),
 
-                      // Editable fields with TextField
-                      _buildTextField('Mobile No', _mobileController),
-                      _buildTextField('Father\'s Name', _fatherNameController),
-                      _buildTextField('Mother\'s Name', _motherNameController),
-                      _buildTextField('Designation', _designationController),
-                      _buildTextField('Office Name', _officeNameController),
+                      // Display fields only if they are not null
+                      if (_user.memMobileNo != null && _user.memMobileNo!.isNotEmpty) _buildReadOnlyTextField('Mobile No', _user.memMobileNo!),
+                      if (_user.fName != null && _user.fName!.isNotEmpty) _buildReadOnlyTextField('Father\'s Name', _user.fName!),
+                      if (_user.mName != null && _user.mName!.isNotEmpty) _buildReadOnlyTextField('Mother\'s Name', _user.mName!),
+                      if (_user.designation != null && _user.designation!.isNotEmpty) _buildReadOnlyTextField('Designation', _user.designation!),
+                      if (_user.preEmail != null && _user.preEmail!.isNotEmpty) _buildReadOnlyTextField('Present Email', _user.preEmail!),
 
-                      // Add other fields similarly
-                      // You can add additional fields as necessary
+                      // TabBar for additional fields placed below the Present Email
+                      const SizedBox(height: 20),
+                      TabBar(
+                        controller: _tabController,
+                        indicator: BoxDecoration(
+                          color: Color(0xFFC0392B), // Active tab color
+                          borderRadius: BorderRadius.circular(10), // Rounded corners for indicator
+                        ),
+                        labelColor: Colors.white, // Text color for active tab
+                        unselectedLabelColor: Colors.black, // Text color for inactive tabs
+                        tabs: [
+                          Container(
+                            width: 100, // Set the desired width for the tab
+                            child: Tab(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Text('Present', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)), // First line
+                                  Text('Address', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)), // Second line
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 100, // Set the desired width for the tab
+                            child: Tab(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Text('Permanent', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)), // First line
+                                  Text('Address', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)), // Second line
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 100, // Set the desired width for the tab
+                            child: Tab(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Text('Office', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)), // First line
+                                  Text('Address', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)), // Second line
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 20), // Space between TabBar and TabBarView
+                      Container(
+                        height: 300, // Fixed height to prevent overflow
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _presentAddressTab(_user.preAddr, _user.prePhone),
+
+                            _permanentAddressTab(_user.perAddr, _user.perPhone),
+                            _officeAddressTab(_user.officeName, _user.offPhone), // Assuming officePhone is defined
+                          ],
+                        ),
+                      ),
+
                     ],
                   ),
                 ),
@@ -110,12 +161,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  // Helper method to build a text field with circular border
-  Widget _buildTextField(String labelText, TextEditingController controller) {
+  // Helper method to build a read-only text field with circular border and black text color
+  Widget _buildReadOnlyTextField(String labelText, String text) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextField(
-        controller: controller,
+        controller: TextEditingController(text: text),
+        readOnly: true, // Set to true to make it read-only
+        style: const TextStyle(color: Colors.black), // Set text color to black
         decoration: InputDecoration(
           labelText: labelText,
           labelStyle: const TextStyle(color: Color(0xFFC0392B)), // Label color
@@ -128,9 +181,57 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
+  // Method to create a tab for address fields
+  Widget _presentAddressTab(String? address, String? phone) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (address != null && address.isNotEmpty) _buildReadOnlyTextField('Address', address),
+          if (phone != null && phone.isNotEmpty) _buildReadOnlyTextField('Phone', phone),
+        ],
+      ),
+    );
+  }
+
+  // Method to create a tab for address fields
+  Widget _permanentAddressTab(String? address, String? phone) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (address != null && address.isNotEmpty) _buildReadOnlyTextField('Address', address),
+          if (phone != null && phone.isNotEmpty) _buildReadOnlyTextField('Phone', phone),
+        ],
+      ),
+    );
+  }
+
+  // Method to create a tab for address fields
+  Widget _officeAddressTab(String? address, String? phone) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (address != null && address.isNotEmpty) _buildReadOnlyTextField('Address', address),
+          if (phone != null && phone.isNotEmpty) _buildReadOnlyTextField('Phone', phone),
+        ],
+      ),
+    );
+  }
+
   // Function to fix the Base64 string if necessary
   String fixBase64(String base64String) {
     // Implement any necessary logic to fix or validate the base64 string
     return base64String; // Example placeholder, modify as needed
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose(); // Dispose of the tab controller
+    super.dispose();
   }
 }

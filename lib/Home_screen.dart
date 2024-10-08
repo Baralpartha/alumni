@@ -275,7 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Members'),
+          title: const Text('Alapon-NDC90'),
           backgroundColor: Colors.greenAccent,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),

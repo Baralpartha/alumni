@@ -101,7 +101,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void initState() {
     getdata();
     super.initState();
-
+    fetchDivisions();
     // Initialize controllers with user data
     _nameController = TextEditingController(text: widget.user.memName);
     _mobileController = TextEditingController(text: widget.user.memMobileNo);
@@ -205,7 +205,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       return;
     }
 
-    // Convert image to Base64 string if image is picked
+    // Convert image to Base64 string if an image is picked
     String? memPhotoBase64;
     if (_pickedImage != null) {
       final bytes = await _pickedImage!.readAsBytes();
@@ -214,8 +214,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     // Construct the updated user data
     final updatedUserData = {
-      'mem_id': memId, // Include mem_id
-      'mem_photo': memPhotoBase64, // Include base64 image data
+      'mem_id': memId,
+      'action': "update",
+      'mem_photo': memPhotoBase64 ?? '', // Ensure empty string if no new image
       'mem_name': _nameController.text,
       'mem_mobile_no': _mobileController.text,
       'f_name': _fNameController.text,
@@ -248,30 +249,68 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       'mem_type': _memTypeController.text,
     };
 
-    // Call your API to update user data here
-    final response = await http.post(
-      Uri.parse('http://103.106.118.10/ndc90_api/userupdate.php'), // Replace with your actual endpoint
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(updatedUserData),
-    );
+    try {
+      // Call your API to update user data here
+      final response = await http.post(
+        Uri.parse('http://103.106.118.10/ndc90_api/userupdate.php'), // Replace with your actual endpoint
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(updatedUserData), // Ensure that the data is correctly formatted
+      );
 
-    if (response.statusCode == 200) {
-      // Handle success
+      if (response.statusCode == 200) {
+        // Handle success
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated successfully!')),
+        );
+
+        // Update local state with the new data
+        final updatedData = json.decode(response.body);
+        // Assuming `updateUserData` method updates the fields in the UI
+        _updateLocalUserData(updatedData); // Function to update the local state
+
+        print(response.body);
+        print('Response: ' + response.body);
+      } else {
+        // Handle error
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to update profile. Please try again.')),
+        );
+      }
+    } catch (e) {
+      // Handle exceptions (e.g., network issues)
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully!')),
+        const SnackBar(content: Text('An error occurred. Please try again later.')),
       );
-      Navigator.pop(context); // Navigate back to previous screen
-    } else {
-      // Handle error
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to update profile. Please try again.')),
-      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
-
-    setState(() {
-      _isLoading = false;
-    });
   }
+
+// Function to update local user data in the UI
+  void _updateLocalUserData(Map<String, dynamic> updatedData) {
+    // Update the local variables or state management logic with the updated data
+    // For example:
+    _nameController.text = updatedData['mem_name'] ?? '';
+    _mobileController.text = updatedData['mem_mobile_no'] ?? '';
+    _fNameController.text = updatedData['f_name'] ?? '';
+    _mNameController.text = updatedData['m_name'] ?? '';
+    _preAddrController.text = updatedData['pre_addr'] ?? '';
+    _prePhoneController.text = updatedData['pre_phone'] ?? '';
+    _preEmailController.text = updatedData['pre_email'] ?? '';
+    _perAddrController.text = updatedData['per_addr'] ?? '';
+    _perPhoneController.text = updatedData['per_phone'] ?? '';
+    _perEmailController.text = updatedData['per_email'] ?? '';
+    _officeNameController.text = updatedData['office_name'] ?? '';
+    _offAddrController.text = updatedData['off_addr'] ?? '';
+    _offPhoneController.text = updatedData['off_phone'] ?? '';
+    _offEmailController.text = updatedData['off_email'] ?? '';
+    _dobController.text = updatedData['dob'] ?? '';
+    _designationController.text = updatedData['designation'] ?? '';
+    // Update additional fields as necessary...
+  }
+
 
 
   // Function to pick image from the gallery
@@ -281,6 +320,96 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (pickedFile != null) {
       setState(() {
         _pickedImage = File(pickedFile.path); // Store the image file
+      });
+
+      // Encode the image to Base64
+      String base64Image = await _encodeImageToBase64(_pickedImage!);
+
+      // Here you can use `base64Image` to include in your database
+      // Example: saveToDatabase(base64Image);
+    }
+  }
+
+// Function to encode image to Base64
+  Future<String> _encodeImageToBase64(File image) async {
+    // Read the image file as bytes
+    Uint8List imageBytes = await image.readAsBytes();
+    // Encode the bytes to Base64
+    String base64String = base64Encode(imageBytes);
+    return base64String; // Return the encoded string
+  }
+
+// Function to decode Base64 to image (optional, for display purposes)
+  Uint8List? _decodeBase64(String? base64String) {
+    if (base64String == null || base64String.isEmpty) {
+      return null; // Return null if the Base64 string is null or empty
+    }
+    return base64Decode(base64String); // Decode and return the bytes
+  }
+
+  // Variables for Dropdowns
+  String? selectedPreDivision;
+  String? selectedPreDistrict;
+  String? selectedPreThana;
+  String? selectedPerDivision;
+  String? selectedPerDistrict;
+  String? selectedPerThana;
+
+  List<dynamic> divisions = [];
+  List<dynamic> districts = [];
+  List<dynamic> thanas = [];
+
+  // For Present Address Dropdowns
+  List<dynamic> preDistricts = [];
+  List<dynamic> preThanas = [];
+
+  // For Permanent Address Dropdowns
+  List<dynamic> perDistricts = [];
+  List<dynamic> perThanas = [];
+
+  // Fetch Divisions
+  Future<void> fetchDivisions() async {
+    final response = await http.get(Uri.parse('http://103.106.118.10/ndc90_api/div.php'));
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      setState(() {
+        divisions = data['data'];
+      });
+    }
+  }
+
+  // Fetch Districts based on division code
+  Future<void> fetchDistricts(String divCode, bool isPresent) async {
+    final response = await http.get(Uri.parse('http://103.106.118.10/ndc90_api/district.php?div_code=$divCode'));
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      setState(() {
+        if (isPresent) {
+          preDistricts = data['data'];
+          selectedPreDistrict = null; // Reset district dropdown
+          selectedPreThana = null;    // Reset thana dropdown
+        } else {
+          perDistricts = data['data'];
+          selectedPerDistrict = null;
+          selectedPerThana = null;
+        }
+      });
+    }
+  }
+
+  // Fetch Thanas based on district code
+  Future<void> fetchThanas(String distCode, bool isPresent) async {
+    final response = await http.get(Uri.parse('http://103.106.118.10/ndc90_api/thana.php?dist_code=$distCode'));
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      setState(() {
+        if (isPresent) {
+          preThanas = data['data'];
+          selectedPreThana = null; // Reset thana dropdown
+        } else {
+          perThanas = data['data'];
+          selectedPerThana = null;
+        }
       });
     }
   }
@@ -330,12 +459,42 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               _buildTextField(_catCodeController, 'Category Code', catCode),
               _buildTextField(_collSecController, 'College Section', collSec),
               _buildTextField(_yrOfPassController, 'Year of Passing', yrOfPass),
-              _buildTextField(_preDivController, 'Present Division', preDiv),
-              _buildTextField(_preDistController, 'Present District', preDist),
-              _buildTextField(_preThanaController, 'Present Thana', preThana),
-              _buildTextField(_perDivController, 'Permanent Division', perDiv),
-              _buildTextField(_perDistController, 'Permanent District', perDist),
-              _buildTextField(_perThanaController, 'Permanent Thana', perThana),
+              // Present Address Dropdowns
+              _buildDropdown('Present Division', selectedPreDivision, divisions, (value) {
+                setState(() {
+                  selectedPreDivision = value;
+                  fetchDistricts(value!, true); // Fetch districts for present address
+                });
+              }),
+              _buildDropdown('Present District', selectedPreDistrict, preDistricts, (value) {
+                setState(() {
+                  selectedPreDistrict = value;
+                  fetchThanas(value!, true); // Fetch thanas for present address
+                });
+              }),
+              _buildDropdown('Present Thana', selectedPreThana, preThanas, (value) {
+                setState(() {
+                  selectedPreThana = value;
+                });
+              }),
+              // Permanent Address Dropdowns
+              _buildDropdown('Permanent Division', selectedPerDivision, divisions, (value) {
+                setState(() {
+                  selectedPerDivision = value;
+                  fetchDistricts(value!, false); // Fetch districts for permanent address
+                });
+              }),
+              _buildDropdown('Permanent District', selectedPerDistrict, perDistricts, (value) {
+                setState(() {
+                  selectedPerDistrict = value;
+                  fetchThanas(value!, false); // Fetch thanas for permanent address
+                });
+              }),
+              _buildDropdown('Permanent Thana', selectedPerThana, perThanas, (value) {
+                setState(() {
+                  selectedPerThana = value;
+                });
+              }),
               _buildTextField(_profCodeController, 'Professional Code', profCode),
               _buildTextField(_domController, 'Date of Membership', dom),
               _buildTextField(_prePostCodeController, 'Present Post Code', prePostCode),
@@ -366,11 +525,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         decoration: InputDecoration(
           labelText: labelText,
           labelStyle: const TextStyle(color: Color(0xFFC0392B)),
-            // Label color
+          // Label color
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30.0), // Circular border
             borderSide: const BorderSide(color: Color(0xFF1A5276)),
-             // Border color
+            // Border color
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30.0), // Circular border when focused
@@ -387,3 +546,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 }
+
+
+Widget _buildDropdown(String label, String? selectedValue, List<dynamic> items, Function(String?) onChanged) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 16.0),
+    child: DropdownButtonFormField<String>(
+      value: selectedValue,
+      isExpanded: true,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(30.0)),
+      ),
+      items: items.map<DropdownMenuItem<String>>((item) {
+        return DropdownMenuItem<String>(
+          value: item['DIV_CODE'] ?? item['DIST_CODE'] ?? item['THANA_CODE'],
+          child: Text(item['DIV_DESC'] ?? item['DIST_DESC'] ?? item['THANA_DESC']),
+        );
+      }).toList(),
+      onChanged: onChanged,
+    ),
+  );
+}
+

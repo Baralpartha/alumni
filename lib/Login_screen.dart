@@ -74,37 +74,57 @@ class _LoginScreenState extends State<LoginScreen> {
           // Extract user information with fallback values
           String username = data['user']['mem_name'] ?? 'Unknown User';
           String memId = data['user']['mem_id']?.toString() ?? 'Unknown ID';
-          String memMobileNo = data['user']['mem_mobile_no']?.toString() ?? 'Unknown Mobile';
-          String collRollNo = data['user']['coll_roll_no']?.toString() ?? 'Unknown Roll No';
+          String memMobileNo = data['user']['mem_mobile_no']?.toString() ??
+              'Unknown Mobile';
+          String collRollNo = data['user']['coll_roll_no']?.toString() ??
+              'Unknown Roll No';
           String catCode = data['user']['cat_code'] ?? 'Unknown Category Code';
           String collSec = data['user']['coll_sec'] ?? 'Unknown Section';
-          String yrOfPass = data['user']['yr_of_pass'] ?? 'Unknown Year of Passing';
+          String yrOfPass = data['user']['yr_of_pass'] ??
+              'Unknown Year of Passing';
           String fName = data['user']['f_name'] ?? 'Unknown Father Name';
           String mName = data['user']['m_name'] ?? 'Unknown Mother Name';
-          String preAddr = data['user']['pre_addr'] ?? 'Unknown Present Address';
+          String preAddr = data['user']['pre_addr'] ??
+              'Unknown Present Address';
           String preDiv = data['user']['pre_div'] ?? 'Unknown Present Division';
-          String preDist = data['user']['pre_dist'] ?? 'Unknown Present District';
-          String preThana = data['user']['pre_thana'] ?? 'Unknown Present Thana';
-          String prePhone = data['user']['pre_phone']?.toString() ?? 'Unknown Present Phone';
-          String preEmail = data['user']['pre_email'] ?? 'Unknown Present Email';
-          String perAddr = data['user']['per_addr'] ?? 'Unknown Permanent Address';
-          String perDiv = data['user']['per_div'] ?? 'Unknown Permanent Division';
-          String perDist = data['user']['per_dist'] ?? 'Unknown Permanent District';
-          String perThana = data['user']['per_thana'] ?? 'Unknown Permanent Thana';
-          String perPhone = data['user']['per_phone']?.toString() ?? 'Unknown Permanent Phone';
-          String perEmail = data['user']['per_email'] ?? 'Unknown Permanent Email';
-          String profCode = data['user']['prof_code'] ?? 'Unknown Profession Code';
-          String designation = data['user']['designation'] ?? 'Unknown Designation';
-          String officeName = data['user']['office_name'] ?? 'Unknown Office Name';
+          String preDist = data['user']['pre_dist'] ??
+              'Unknown Present District';
+          String preThana = data['user']['pre_thana'] ??
+              'Unknown Present Thana';
+          String prePhone = data['user']['pre_phone']?.toString() ??
+              'Unknown Present Phone';
+          String preEmail = data['user']['pre_email'] ??
+              'Unknown Present Email';
+          String perAddr = data['user']['per_addr'] ??
+              'Unknown Permanent Address';
+          String perDiv = data['user']['per_div'] ??
+              'Unknown Permanent Division';
+          String perDist = data['user']['per_dist'] ??
+              'Unknown Permanent District';
+          String perThana = data['user']['per_thana'] ??
+              'Unknown Permanent Thana';
+          String perPhone = data['user']['per_phone']?.toString() ??
+              'Unknown Permanent Phone';
+          String perEmail = data['user']['per_email'] ??
+              'Unknown Permanent Email';
+          String profCode = data['user']['prof_code'] ??
+              'Unknown Profession Code';
+          String designation = data['user']['designation'] ??
+              'Unknown Designation';
+          String officeName = data['user']['office_name'] ??
+              'Unknown Office Name';
           String offAddr = data['user']['off_addr'] ?? 'Unknown Office Address';
           String offDiv = data['user']['off_div'] ?? 'Unknown Office Division';
-          String offDist = data['user']['off_dist'] ?? 'Unknown Office District';
+          String offDist = data['user']['off_dist'] ??
+              'Unknown Office District';
           String offThana = data['user']['off_thana'] ?? 'Unknown Office Thana';
-          String offPhone = data['user']['off_phone']?.toString() ?? 'Unknown Office Phone';
+          String offPhone = data['user']['off_phone']?.toString() ??
+              'Unknown Office Phone';
           String offEmail = data['user']['off_email'] ?? 'Unknown Office Email';
           String dob = data['user']['dob'] ?? 'Unknown DOB';
           String dom = data['user']['dom'] ?? 'Unknown DOM';
-          String prePostCode = data['user']['pre_post_code'] ?? 'Unknown Present Post Code';
+          String prePostCode = data['user']['pre_post_code'] ??
+              'Unknown Present Post Code';
           String memType = data['user']['mem_type'] ?? 'Unknown Member Type';
 
           // Save user data to SharedPreferences
@@ -145,25 +165,22 @@ class _LoginScreenState extends State<LoginScreen> {
           await pref.setString("membertype", memType);
 
 
-
-
-
-
-        // Save credentials if successful
+          // Save credentials if successful
           await _saveCredentials(phone, password);
 
           // Navigate to HomeScreen with user data
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => HomeScreen(
-                user: {
-                  'name': username,
-                  'memId': memId,
-                  'phone': memMobileNo,
-                  'collRollNo': collRollNo,
-                },
-              ),
+              builder: (context) =>
+                  HomeScreen(
+                    user: {
+                      'name': username,
+                      'memId': memId,
+                      'phone': memMobileNo,
+                      'collRollNo': collRollNo,
+                    },
+                  ),
             ),
           );
         } else {
@@ -191,18 +208,19 @@ class _LoginScreenState extends State<LoginScreen> {
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-            },
-            child: const Text('OK'),
+      builder: (ctx) =>
+          AlertDialog(
+            title: const Text('Error'),
+            content: Text(message),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -216,18 +234,20 @@ class _LoginScreenState extends State<LoginScreen> {
   void _forgotPassword() {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Forgot Password'),
-        content: const Text('Instructions to reset your password have been sent to your registered email.'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-            },
-            child: const Text('OK'),
+      builder: (ctx) =>
+          AlertDialog(
+            title: const Text('Forgot Password'),
+            content: const Text(
+                'Instructions to reset your password have been sent to your registered email.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -241,26 +261,22 @@ class _LoginScreenState extends State<LoginScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-
-            const SizedBox(height:70), // Space between texts and image
-            // Circular Image
+            const SizedBox(height: 70), // টেক্সট এবং ইমেজের মধ্যে স্থান
+            // সার্কুলার ইমেজ
             Center(
               child: Container(
-                width: 120,
-                height: 120,
+                width: 140,
+                height: 140,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   image: DecorationImage(
-                    image: AssetImage('assets/images/nclogo.jpg'), // Replace with your image path
+                    image: AssetImage('assets/images/ndccc.png'),
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 5), // Space between the image and the text
-            // Bold text below the image
-
-            const SizedBox(height: 10),
+            const SizedBox(height: 20), // ইমেজ এবং টেক্সটের মধ্যে স্থান
             TextField(
               controller: _phoneController,
               decoration: InputDecoration(
@@ -286,7 +302,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 fillColor: Colors.white,
                 suffixIcon: IconButton(
                   icon: Icon(
-                    _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    _isPasswordVisible ? Icons.visibility : Icons
+                        .visibility_off,
                   ),
                   onPressed: () {
                     setState(() {
@@ -296,33 +313,36 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            const SizedBox(height: 20),
-            Center( // Use Center widget to center the button
+            const SizedBox(height: 25),
+            Center(
               child: SizedBox(
-                width: 300, // Set a fixed width for the button container (adjust as needed)
+                width: MediaQuery
+                    .of(context)
+                    .size
+                    .width * 0.8, // রেস্পন্সিভ প্রস্থ
                 child: Container(
-                  height: 50, // Set a fixed height for the button container
+                  height: 50,
                   decoration: BoxDecoration(
-                    color: Colors.white, // Background color of the button container
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF000000), // Shadow color
-                        offset: Offset(0, 2), // Offset for the shadow
-                        blurRadius: 6.0, // Blur radius for the shadow
-                        spreadRadius: 0.0, // Spread radius for the shadow
+                        color: const Color(0xFF000000),
+                        offset: Offset(0, 2),
+                        blurRadius: 6.0,
+                        spreadRadius: 0.0,
                       ),
                     ],
                   ),
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : () {
-                      _loginUser(_phoneController.text.trim(), _passwordController.text.trim());
+                      _loginUser(_phoneController.text.trim(),
+                          _passwordController.text.trim());
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF48c9b0),
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 10), // Adjust vertical padding
+                      padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -332,18 +352,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         : const Text(
                       'Login',
                       style: TextStyle(
-                        fontSize: 20, // Font size
-                        fontWeight: FontWeight.bold, // Make the text bold
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-
-
-
-
             const SizedBox(height: 5),
             TextButton(
               onPressed: _forgotPassword,
@@ -353,30 +369,33 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 3),
-            Center( // Center the button horizontally
+            Center(
               child: SizedBox(
-                width: 100, // Set a fixed width for the button container (adjust as needed)
+                width: MediaQuery
+                    .of(context)
+                    .size
+                    .width * 0.5, // রেস্পন্সিভ প্রস্থ
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white, // Background color of the button container
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(25),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF000000), // Shadow color
-                        offset: Offset(0, 2), // Offset for the shadow
-                        blurRadius: 6.0, // Blur radius for the shadow
-                        spreadRadius: 0.0, // Spread radius for the shadow
+                        color: const Color(0xFF000000),
+                        offset: Offset(0, 2),
+                        blurRadius: 6.0,
+                        spreadRadius: 0.0,
                       ),
                     ],
                   ),
                   child: SizedBox(
-                    height: 40, // Adjust the height of the button container here
+                    height: 40,
                     child: ElevatedButton(
                       onPressed: _navigateToSignUp,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFF27ae60),
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 10), // Adjust vertical padding
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -384,8 +403,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: const Text(
                         'Sign Up',
                         style: TextStyle(
-                          fontSize: 15, // Adjust the font size as needed
-                          fontWeight: FontWeight.bold, // Make the text bold
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
@@ -393,49 +412,67 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              'Alapon-NCA90',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: Colors.black,
+            const SizedBox(height: 20), // ইমেজ যোগ করার স্থান
+
+            // এখানে সাইন আপের নিচে ছবি যোগ করুন
+            Center(
+              child: Container(
+                width: 100, // ছবির প্রস্থ
+                height: 100, // ছবির উচ্চতা
+                decoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  image: DecorationImage(
+                    image: AssetImage('assets/images/logooo.png'),
+                    // আপনার ছবির পাথ এখানে দিন
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
             ),
 
+            const SizedBox(height: 20), // Adjust this space as needed
 
-
-
+            // এখানে টেক্সট যোগ করুন
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: const Text(
+                'Alapon-NCA90',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20), // Adjust this space as needed
           ],
         ),
       ),
       bottomNavigationBar: Container(
-        height: 60, // Set the height of the BottomNavigationBar
-        color: const Color(0xFF7dcea0), // Set the background color
+        height: 60,
+        color: const Color(0xFF7dcea0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // Center the content vertically
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
               'Powered by:',
               style: TextStyle(
-                fontSize: 14, // Font size of the text
+                fontSize: 14,
                 color: Colors.white,
-                fontWeight: FontWeight.bold,// Text color
+                fontWeight: FontWeight.bold,
               ),
             ),
             const Text(
               'IT Bangla Limited',
               style: TextStyle(
-                fontSize: 20, // Font size of the text
-                color: Colors.white, // Text color
+                fontSize: 20,
+                color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ],
         ),
       ),
-
-
     );
   }
 }

@@ -2,8 +2,6 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
 
-
-
 class CarouselScreen extends StatefulWidget {
   const CarouselScreen({Key? key}) : super(key: key);
 
@@ -12,6 +10,8 @@ class CarouselScreen extends StatefulWidget {
 }
 
 class _CarouselScreenState extends State<CarouselScreen> {
+  late double carouselHeight; // Declare a variable for carousel height
+
   @override
   void initState() {
     super.initState();
@@ -26,6 +26,13 @@ class _CarouselScreenState extends State<CarouselScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Get the screen height
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Responsive carousel height for small and large screens
+    carouselHeight = screenHeight * (screenWidth < 700 ? 0.7 : 0.7);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Alapon-NDC90', style: TextStyle(color: Colors.black)),
@@ -45,7 +52,7 @@ class _CarouselScreenState extends State<CarouselScreen> {
           // Carousel Slider
           CarouselSlider(
             options: CarouselOptions(
-              height:520.0,
+              height: carouselHeight, // Use responsive height here
               autoPlay: true,
               autoPlayInterval: Duration(seconds: 3),
               enlargeCenterPage: true,
@@ -55,7 +62,6 @@ class _CarouselScreenState extends State<CarouselScreen> {
             items: [
               _carouselItem('assets/images/slider1.png', 'Explore Opportunities', 'Join our network and grow.'),
               _carouselItem('assets/images/slidera.jpg', 'Stay Connected', 'Be a part of our alumni community.'),
-
             ],
           ),
           const Spacer(),
@@ -63,21 +69,31 @@ class _CarouselScreenState extends State<CarouselScreen> {
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: TextButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
-                  );
-                },
-                child: const Text(
-                  'Skip',
-                  style: TextStyle(fontSize: 16, color: Colors.blue),
+              child: Container(
+                width:80,
+                // Set a fixed width for the box
+                decoration: BoxDecoration(
+                  color: Colors.lightBlueAccent, // Background color of the box
+                  borderRadius: BorderRadius.circular(15), // Rounded corners
+                ),
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const LoginScreen()),
+                    );
+                  },
+                  child: const Text(
+                    'Skip',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.white), // Bold text
+                  ),
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 10),
+
+
+          const SizedBox(height: 20),
         ],
       ),
     );
