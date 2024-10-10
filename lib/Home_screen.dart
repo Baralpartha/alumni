@@ -100,6 +100,7 @@ class User {
       designation: json['DESIGNATION'],
       collRollNo: json['COLL_ROLL_NO'],
       yrOfPass: json['YR_OF_PASS'],
+      dom: json['Date_of_Membership']
     );
   }
 }
@@ -123,6 +124,11 @@ class _HomeScreenState extends State<HomeScreen> {
   // Store the logged-in user info
   User? loggedInUser;
 
+  // Dropdown filter options
+  String? selectedFilter;
+  final List<String> filterOptions = [
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -132,7 +138,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _fetchUserList() async {
     try {
-      final response = await http.get(Uri.parse('http://103.106.118.10/ndc90_api/userdata.php'));
+      final response = await http.get(
+          Uri.parse('http://103.106.118.10/ndc90_api/userdata.php'));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -155,6 +162,21 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _filterUsers(String query) {
+    setState(() {
+      filteredUserList = userList.where((user) {
+        final matchesQuery = user.memName.toLowerCase().contains(
+            query.toLowerCase()) ||
+            user.memMobileNo.contains(query);
+        final matchesFilter = selectedFilter == null || selectedFilter == 'All'
+            ? true // Show all if 'All' is selected
+            : user.designation ==
+            selectedFilter; // Adjust this to your criteria
+        return matchesQuery && matchesFilter;
+      }).toList();
+    });
+  }
+
   // Fetch the logged-in user's data from SharedPreferences
   void _getLoggedInUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -170,12 +192,15 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     // Debugging
-    print('Saved User Data: ${prefs.getString('memId')}, ${prefs.getString('memName')}, ${prefs.getString('memMobileNo')}');
+    print('Saved User Data: ${prefs.getString('memId')}, ${prefs.getString(
+        'memName')}, ${prefs.getString('memMobileNo')}');
   }
 
   String fixBase64(String base64) {
     if (base64.contains(',')) {
-      base64 = base64.split(',').last; // Removes 'data:image/jpeg;base64,' if present
+      base64 = base64
+          .split(',')
+          .last; // Removes 'data:image/jpeg;base64,' if present
     }
     base64 = base64.replaceAll(RegExp(r'\s+'), ''); // Remove whitespaces
 
@@ -196,39 +221,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _filterUsers(String query) {
-    setState(() {
-      filteredUserList = userList.where((user) {
-        return user.memName.toLowerCase().contains(query.toLowerCase()) ||
-            user.memMobileNo.contains(query);
-      }).toList();
-    });
-  }
-
-  void _showLogoutDialog() {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Are you sure?'),
-        content: const Text('Do you want to log out?'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-            },
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              _logout();
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
 
   Future<void> _logout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -261,11 +253,13 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundImage: MemoryImage(decodedImage),
         );
       } else {
-        return const CircleAvatar(child: Icon(Icons.person)); // Fallback if decoding fails
+        return const CircleAvatar(
+            child: Icon(Icons.person)); // Fallback if decoding fails
       }
     } catch (e) {
       print('Error decoding image: $e');
-      return const CircleAvatar(child: Icon(Icons.person)); // Fallback in case of any errors
+      return const CircleAvatar(
+          child: Icon(Icons.person)); // Fallback in case of any errors
     }
   }
 
@@ -275,11 +269,17 @@ class _HomeScreenState extends State<HomeScreen> {
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Alapon-NDC90'),
+          title: const Text(
+            'Alapon-NDC90',
+            style: TextStyle(
+              fontSize: 20, // Adjust the font size as needed
+              fontWeight: FontWeight.bold, // Makes the text bold
+            ),
+          ),
+          centerTitle: true,
           backgroundColor: Colors.greenAccent,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            //onPressed: _showLogoutDialog,
             onPressed: () {
               Navigator.pushReplacement(
                 context,
@@ -287,44 +287,65 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(20), // Adjust the radius as needed
+            ),
+          ),
         ),
+
         body: Padding(
           padding: const EdgeInsets.all(20.0),
-          child: _isLoading // Show CircularProgressIndicator when loading
+          child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : Column(
             children: <Widget>[
-              TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  labelText: 'Search',
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        labelText: 'Search',
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.filter_list),
+                          onPressed: () {
+                            // Show the filter options when the icon is clicked
+                            _showFilterOptions(context);
+                          },
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onChanged: (query) {
+                        _filterUsers(query);
+                      },
+                    ),
                   ),
-                ),
-                onChanged: _filterUsers,
+                ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               Expanded(
                 child: filteredUserList.isEmpty
                     ? const Center(child: Text('No members found.'))
-                :ListView.builder(
+                    : ListView.builder(
                   itemCount: filteredUserList.length,
                   itemBuilder: (context, index) {
                     User user = filteredUserList[index];
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 8.0),
                       child: ListTile(
-                        leading: user.memPhoto != null && user.memPhoto!.isNotEmpty
+                        leading: user.memPhoto != null &&
+                            user.memPhoto!.isNotEmpty
                             ? _buildUserAvatar(user.memPhoto!)
                             : const CircleAvatar(child: Icon(Icons.person)),
                         title: Text(user.memName),
                         subtitle: Text(user.memMobileNo),
                         trailing: IconButton(
-                          icon: const Icon(Icons.call), // Call icon
+                          icon: const Icon(Icons.call),
                           onPressed: () async {
-                            // Launch the phone dialer
                             final phoneUrl = 'tel:${user.memMobileNo}';
                             if (await canLaunch(phoneUrl)) {
                               await launch(phoneUrl);
@@ -337,15 +358,15 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => UserProfileScreen(user: user),
+                              builder: (context) =>
+                                  UserProfileScreen(user: user),
                             ),
                           );
                         },
                       ),
                     );
                   },
-                )
-
+                ),
               ),
             ],
           ),
@@ -362,18 +383,15 @@ class _HomeScreenState extends State<HomeScreen> {
             setState(() {
               _currentIndex = index;
               if (index == 2) {
-                // Navigate to EditProfileScreen only if loggedInUser is not null
                 if (loggedInUser != null) {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => EditProfileScreen(user: loggedInUser!),
-
+                      builder: (context) =>
+                          EditProfileScreen(user: loggedInUser!),
                     ),
                   );
                 } else {
-                  // Optionally show an error message or redirect to the login screen
-
                   print('No logged-in user data available.');
                 }
               }
@@ -381,6 +399,81 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         ),
       ),
+    );
+  }
+
+  void _showFilterOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('Group'),
+                onTap: () {
+                  Navigator.pop(context); // Close the bottom sheet
+                  _showSubFilterOptions(context, 'Group');
+                },
+              ),
+              ListTile(
+                title: const Text('Profession'),
+                onTap: () {
+                  Navigator.pop(context); // Close the bottom sheet
+                  _showSubFilterOptions(context, 'Profession');
+                },
+              ),
+              ListTile(
+                title: const Text('Blood Group'),
+                onTap: () {
+                  Navigator.pop(context); // Close the bottom sheet
+                  _showSubFilterOptions(context, 'Blood Group');
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSubFilterOptions(BuildContext context, String filterCategory) {
+    List<String> subOptions = [];
+
+    // Define sub-options based on the category selected
+    if (filterCategory == 'Group') {
+      subOptions = ['Bangla', 'English', 'Science'];
+    } else if (filterCategory == 'Profession') {
+      subOptions = ['Doctor', 'Engineer', 'Banker', 'Businessman'];
+    } else if (filterCategory == 'Blood Group') {
+      subOptions = ['AB+', 'O+', 'A+', 'B+'];
+    }
+
+    // Show a dialog with sub-options based on the selected category
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Select $filterCategory'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: subOptions.map((String option) {
+              return ListTile(
+                title: Text(option),
+                onTap: () {
+                  setState(() {
+                    selectedFilter = option; // Set the selected filter
+                    _filterUsers(_searchController.text); // Apply the filter
+                  });
+                  Navigator.pop(context); // Close the sub-filter dialog
+                },
+              );
+            }).toList(),
+          ),
+        );
+      },
     );
   }
 }

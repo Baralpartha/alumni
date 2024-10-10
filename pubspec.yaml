@@ -27,6 +27,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^3.0.0
 
+
 flutter:
   uses-material-design: true
 
@@ -37,6 +38,11 @@ flutter:
     - assets/images/slidera.jpg
     - assets/images/ndccc.png
     - assets/images/logooo.png
+
+  # Splash screen configuration added here
+
+
+
 
 
 

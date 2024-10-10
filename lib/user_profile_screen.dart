@@ -41,9 +41,24 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_user.memName ?? "User Profile"),
+        title: Text(
+          "Alapon-NDC90",
+          style: TextStyle(
+            fontSize: 20,
+            color: Colors.white,// Adjust the font size as needed
+            fontWeight: FontWeight.bold, // Makes the text bold
+          ),
+        ),
         centerTitle: true,
+        backgroundColor: Colors.greenAccent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(20), // Adjust the radius as needed
+          ),
+        ),
       ),
+
+
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -80,15 +95,21 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
                       const SizedBox(height: 20),
 
                       // Display fields only if they are not null
-                      if (_user.memMobileNo != null && _user.memMobileNo!.isNotEmpty) _buildReadOnlyTextField('Mobile No', _user.memMobileNo!),
-                      if (_user.fName != null && _user.fName!.isNotEmpty) _buildReadOnlyTextField('Father\'s Name', _user.fName!),
-                      if (_user.mName != null && _user.mName!.isNotEmpty) _buildReadOnlyTextField('Mother\'s Name', _user.mName!),
-                      if (_user.designation != null && _user.designation!.isNotEmpty) _buildReadOnlyTextField('Designation', _user.designation!),
-                      if (_user.preEmail != null && _user.preEmail!.isNotEmpty) _buildReadOnlyTextField('Present Email', _user.preEmail!),
+                      if (_user.memMobileNo != null && _user.memMobileNo!.isNotEmpty)
+                        _buildReadOnlyTextField('Mobile Number', _user.memMobileNo!),
+                      if (_user.designation != null && _user.designation!.isNotEmpty)
+                        _buildReadOnlyTextField('Designation', _user.designation!),
+                      if (_user.officeName != null && _user.officeName!.isNotEmpty)
+                        _buildReadOnlyTextField('Office', _user.officeName!),
+                      if (_user.preEmail != null && _user.preEmail!.isNotEmpty)
+                        _buildReadOnlyTextField('Email', _user.preEmail!),
+                      if (_user.collRollNo != null && _user.collRollNo!.isNotEmpty)
+                        _buildReadOnlyTextField('Roll Number', _user.collRollNo!),
 
                       // TabBar for additional fields placed below the Present Email
                       const SizedBox(height: 20),
                       TabBar(
+
                         controller: _tabController,
                         indicator: BoxDecoration(
                           color: Color(0xFFC0392B), // Active tab color
@@ -97,42 +118,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
                         labelColor: Colors.white, // Text color for active tab
                         unselectedLabelColor: Colors.black, // Text color for inactive tabs
                         tabs: [
-                          Container(
-                            width: 100, // Set the desired width for the tab
-                            child: Tab(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
-                                  Text('Present', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)), // First line
-                                  Text('Address', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)), // Second line
-                                ],
-                              ),
-                            ),
-                          ),
-                          Container(
-                            width: 100, // Set the desired width for the tab
-                            child: Tab(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
-                                  Text('Permanent', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)), // First line
-                                  Text('Address', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)), // Second line
-                                ],
-                              ),
-                            ),
-                          ),
-                          Container(
-                            width: 100, // Set the desired width for the tab
-                            child: Tab(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
-                                  Text('Office', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)), // First line
-                                  Text('Address', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)), // Second line
-                                ],
-                              ),
-                            ),
-                          ),
+                          _buildTab('Present\nAddress'),
+                          _buildTab('Permanent\nAddress'),
+                          _buildTab('Office\nAddress'),
                         ],
                       ),
 
@@ -142,10 +130,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
                         child: TabBarView(
                           controller: _tabController,
                           children: [
-                            _presentAddressTab(_user.preAddr, _user.prePhone),
-
-                            _permanentAddressTab(_user.perAddr, _user.perPhone),
-                            _officeAddressTab(_user.officeName, _user.offPhone), // Assuming officePhone is defined
+                            _presentAddressTab(_user.preAddr, _user.prePhone, _user.preDiv, _user.preThana, _user.preDist, _user.prePostCode,_user.dom),
+                            _permanentAddressTab(_user.perAddr, _user.perPhone, _user.perDiv, _user.perThana, _user.perDist),
+                            _officeAddressTab(_user.offAddr, _user.offPhone, _user.offEmail),
                           ],
                         ),
                       ),
@@ -181,8 +168,30 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
     );
   }
 
-  // Method to create a tab for address fields
-  Widget _presentAddressTab(String? address, String? phone) {
+  // Method to create a tab for Present Address fields
+  Widget _presentAddressTab(String? preAddr, String? prePhone, String? preDiv, String? preThana, String? preDist, String? prePostCode,String? dom) {
+    print('DOM value: $dom');
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (preAddr != null && preAddr!.isNotEmpty) _buildReadOnlyTextField('Present Address', preAddr!),
+          if (prePhone != null && prePhone!.isNotEmpty) _buildReadOnlyTextField('Phone', prePhone!),
+          if (preDiv != null && preDiv!.isNotEmpty) _buildReadOnlyTextField('Division', preDiv!),
+          if (preThana != null && preThana!.isNotEmpty) _buildReadOnlyTextField('Thana', preThana!),
+          if (preDist != null && preDist!.isNotEmpty) _buildReadOnlyTextField('District', preDist!),
+          if (prePostCode != null && prePostCode!.isNotEmpty) _buildReadOnlyTextField('Postcode', prePostCode!),
+          if (dom != null && dom!.isNotEmpty) _buildReadOnlyTextField('Date Of Membership', dom!),
+        ],
+
+      ),
+    );
+  }
+
+  // Method to create a tab for Permanent Address fields
+  Widget _permanentAddressTab(String? address, String? phone, String? div, String? thana, String? dist) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -190,48 +199,43 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
         children: [
           if (address != null && address.isNotEmpty) _buildReadOnlyTextField('Address', address),
           if (phone != null && phone.isNotEmpty) _buildReadOnlyTextField('Phone', phone),
+          if (div != null && div.isNotEmpty) _buildReadOnlyTextField('Division', div),
+          if (thana != null && thana.isNotEmpty) _buildReadOnlyTextField('Thana', thana),
+          if (dist != null && dist.isNotEmpty) _buildReadOnlyTextField('District', dist),
         ],
       ),
     );
   }
 
-  // Method to create a tab for address fields
-  Widget _permanentAddressTab(String? address, String? phone) {
+  // Method to create a tab for Office Address fields
+  Widget _officeAddressTab(String? offAddr, String? phone, String? email) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (address != null && address.isNotEmpty) _buildReadOnlyTextField('Address', address),
+          if (offAddr != null && offAddr.isNotEmpty) _buildReadOnlyTextField('Office Address', offAddr),
           if (phone != null && phone.isNotEmpty) _buildReadOnlyTextField('Phone', phone),
+          if (email != null && email.isNotEmpty) _buildReadOnlyTextField('Email', email),
         ],
       ),
     );
   }
 
-  // Method to create a tab for address fields
-  Widget _officeAddressTab(String? address, String? phone) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+  // Helper method to build a custom tab
+  Widget _buildTab(String title) {
+    return Tab(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (address != null && address.isNotEmpty) _buildReadOnlyTextField('Address', address),
-          if (phone != null && phone.isNotEmpty) _buildReadOnlyTextField('Phone', phone),
+          Text(title, textAlign: TextAlign.center),
         ],
       ),
     );
   }
 
-  // Function to fix the Base64 string if necessary
-  String fixBase64(String base64String) {
-    // Implement any necessary logic to fix or validate the base64 string
-    return base64String; // Example placeholder, modify as needed
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose(); // Dispose of the tab controller
-    super.dispose();
+  // Helper method to fix the Base64 string before decoding
+  String fixBase64(String base64) {
+    return base64.replaceAll('data:image/png;base64,', '').replaceAll(' ', '+');
   }
 }

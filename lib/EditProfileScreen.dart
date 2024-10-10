@@ -248,6 +248,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       'pre_post_code': _prePostCodeController.text,
       'mem_type': _memTypeController.text,
     };
+    // Prepare the request body
+    final Map<String, dynamic> requestBody = {
+      'user_id':memId, // Include other necessary fields based on your API requirements
+      'prof_code': selectedProfCode,
+    };
 
     try {
       // Call your API to update user data here
@@ -264,18 +269,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         );
 
         // Update local state with the new data
-        final updatedData = json.decode(response.body);
-        // Assuming `updateUserData` method updates the fields in the UI
-        _updateLocalUserData(updatedData); // Function to update the local state
 
-        print(response.body);
-        print('Response: ' + response.body);
+        // Optionally, you can navigate back or refresh the user data
+        Navigator.pop(context, true); // Go back to the previous screen
       } else {
         // Handle error
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to update profile. Please try again.')),
+          SnackBar(content: Text('Failed to update profile: ${response.body}')),
         );
       }
+
     } catch (e) {
       // Handle exceptions (e.g., network issues)
       ScaffoldMessenger.of(context).showSnackBar(
@@ -354,7 +357,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? selectedPerDivision;
   String? selectedPerDistrict;
   String? selectedPerThana;
+  String? selectedProfCode;
 
+  List<dynamic> profCodes = [];
   List<dynamic> divisions = [];
   List<dynamic> districts = [];
   List<dynamic> thanas = [];
@@ -366,6 +371,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   // For Permanent Address Dropdowns
   List<dynamic> perDistricts = [];
   List<dynamic> perThanas = [];
+
 
   // Fetch Divisions
   Future<void> fetchDivisions() async {
@@ -416,105 +422,216 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Profile'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // User Profile Photo with image picker
-              GestureDetector(
-                onTap: _pickImage, // When tapped, open the image picker
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundImage: _pickedImage != null
-                      ? FileImage(_pickedImage!) // Show picked image if available
-                      : usermemphoto != null && usermemphoto!.isNotEmpty
-                      ? MemoryImage(decodeBase64(usermemphoto!)!)
-                      : const AssetImage('assets/default_profile.png') as ImageProvider, // Fallback image
+    return DefaultTabController(
+      length: 3, // Number of tabs
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            "Edit Profile",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.greenAccent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(20),
+            ),
+          ),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                // User Profile Photo with image picker
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: CircleAvatar(
+                    radius: 50,
+                    backgroundImage: _pickedImage != null
+                        ? FileImage(_pickedImage!)
+                        : usermemphoto != null && usermemphoto!.isNotEmpty
+                        ? MemoryImage(decodeBase64(usermemphoto!)!)
+                        : const AssetImage('assets/default_profile.png') as ImageProvider,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              // User Information Fields
-              _buildTextField(_nameController, 'Name', username),
-              _buildTextField(_mobileController, 'Phone number', savedPhone),
-              _buildTextField(_fNameController, 'Father\'s Name', fathername),
-              _buildTextField(_mNameController, 'Mother\'s Name', mothername),
-              _buildTextField(_preAddrController, 'Present Address', presentAddress),
-              _buildTextField(_prePhoneController, 'Present Phone', presentPhone),
-              _buildTextField(_preEmailController, 'Present Email', presentEmail),
-              _buildTextField(_perAddrController, 'Permanent Address', permanentAddress),
-              _buildTextField(_perPhoneController, 'Permanent Phone', permanentPhone),
-              _buildTextField(_perEmailController, 'Permanent Email', permanentEmail),
-              _buildTextField(_officeNameController, 'Office Name', officeName),
-              _buildTextField(_offAddrController, 'Office Address', officeAddress),
-              _buildTextField(_offPhoneController, 'Office Phone', officePhone),
-              _buildTextField(_offEmailController, 'Office Email', officeEmail),
-              _buildTextField(_dobController, 'Date of Birth', dob),
-              _buildTextField(_designationController, 'Designation', designation),
-              _buildTextField(_catCodeController, 'Category Code', catCode),
-              _buildTextField(_collSecController, 'College Section', collSec),
-              _buildTextField(_yrOfPassController, 'Year of Passing', yrOfPass),
-              // Present Address Dropdowns
-              _buildDropdown('Present Division', selectedPreDivision, divisions, (value) {
-                setState(() {
-                  selectedPreDivision = value;
-                  fetchDistricts(value!, true); // Fetch districts for present address
-                });
-              }),
-              _buildDropdown('Present District', selectedPreDistrict, preDistricts, (value) {
-                setState(() {
-                  selectedPreDistrict = value;
-                  fetchThanas(value!, true); // Fetch thanas for present address
-                });
-              }),
-              _buildDropdown('Present Thana', selectedPreThana, preThanas, (value) {
-                setState(() {
-                  selectedPreThana = value;
-                });
-              }),
-              // Permanent Address Dropdowns
-              _buildDropdown('Permanent Division', selectedPerDivision, divisions, (value) {
-                setState(() {
-                  selectedPerDivision = value;
-                  fetchDistricts(value!, false); // Fetch districts for permanent address
-                });
-              }),
-              _buildDropdown('Permanent District', selectedPerDistrict, perDistricts, (value) {
-                setState(() {
-                  selectedPerDistrict = value;
-                  fetchThanas(value!, false); // Fetch thanas for permanent address
-                });
-              }),
-              _buildDropdown('Permanent Thana', selectedPerThana, perThanas, (value) {
-                setState(() {
-                  selectedPerThana = value;
-                });
-              }),
-              _buildTextField(_profCodeController, 'Professional Code', profCode),
-              _buildTextField(_domController, 'Date of Membership', dom),
-              _buildTextField(_prePostCodeController, 'Present Post Code', prePostCode),
-              _buildTextField(_memTypeController, 'Member Type', memType),
+                // User Information Fields
+                _buildTextField(_nameController, 'Name', username),
+                _buildTextField(_mobileController, 'Phone number', savedPhone),
+                _buildTextField(_fNameController, 'Father\'s Name', fathername),
+                _buildTextField(_mNameController, 'Mother\'s Name', mothername),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
-              // Save Button
-              _isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                onPressed: _updateUserData,
-                child: const Text('Save Changes'),
-              ),
-            ],
+                // Tab Bar for addresses
+                TabBar(
+                  tabs: [
+                    Tab(
+                      child: Container(
+                        height: 60.0, // Set a common height for all tabs
+                        decoration: BoxDecoration(
+                          color: Color(0xFFC0392B), // Set background color
+                          borderRadius: BorderRadius.circular(8.0), // Optional: add rounded corners
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Present", style: TextStyle(color: Colors.white)),
+                            Text("Address", style: TextStyle(color: Colors.white)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Tab(
+                      child: Container(
+                        height: 60.0, // Set a common height for all tabs
+                        decoration: BoxDecoration(
+                          color: Color(0xFFC0392B), // Set background color
+                          borderRadius: BorderRadius.circular(8.0), // Optional: add rounded corners
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Permanent", style: TextStyle(color: Colors.white)),
+                            Text("Address", style: TextStyle(color: Colors.white)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Tab(
+                      child: Container(
+                        height: 60.0, // Set a common height for all tabs
+                        decoration: BoxDecoration(
+                          color: Color(0xFFC0392B), // Set background color
+                          borderRadius: BorderRadius.circular(8.0), // Optional: add rounded corners
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Office", style: TextStyle(color: Colors.white)),
+                            Text("Address", style: TextStyle(color: Colors.white)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+
+                const SizedBox(height:20),
+                // Tab view for addresses
+                SizedBox(
+                  height: 400, // Adjust height as needed
+                  child: TabBarView(
+                    children: [
+                      // Present Address Tab
+                      Container(
+                        padding: const EdgeInsets.all(16.0), // Add padding if needed
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              _buildTextField(_preAddrController, 'Present Address', presentAddress),
+                              _buildTextField(_prePhoneController, 'Present Phone', presentPhone),
+                              _buildTextField(_preEmailController, 'Present Email', presentEmail),
+                              _buildDropdown('Present Division', selectedPreDivision, divisions, (value) {
+                                setState(() {
+                                  selectedPreDivision = value;
+                                  fetchDistricts(value!, true); // Fetch districts for present address
+                                });
+                              }),
+                              _buildDropdown('Present District', selectedPreDistrict, preDistricts, (value) {
+                                setState(() {
+                                  selectedPreDistrict = value;
+                                  fetchThanas(value!, true); // Fetch thanas for present address
+                                });
+                              }),
+                              _buildDropdown('Present Thana', selectedPreThana, preThanas, (value) {
+                                setState(() {
+                                  selectedPreThana = value;
+                                });
+                              }),
+                              _buildTextField(_prePostCodeController, 'Present Post Code', prePostCode),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // Permanent Address Tab
+                      Container(
+                        padding: const EdgeInsets.all(16.0), // Add padding if needed
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              _buildTextField(_perAddrController, 'Permanent Address', permanentAddress),
+                              _buildTextField(_perPhoneController, 'Permanent Phone', permanentPhone),
+                              _buildTextField(_perEmailController, 'Permanent Email', permanentEmail),
+                              _buildDropdown('Permanent Division', selectedPerDivision, divisions, (value) {
+                                setState(() {
+                                  selectedPerDivision = value;
+                                  fetchDistricts(value!, false); // Fetch districts for permanent address
+                                });
+                              }),
+                              _buildDropdown('Permanent District', selectedPerDistrict, perDistricts, (value) {
+                                setState(() {
+                                  selectedPerDistrict = value;
+                                  fetchThanas(value!, false); // Fetch thanas for permanent address
+                                });
+                              }),
+                              _buildDropdown('Permanent Thana', selectedPerThana, perThanas, (value) {
+                                setState(() {
+                                  selectedPerThana = value;
+                                });
+                              }),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // Office Address Tab
+                      Container(
+                        padding: const EdgeInsets.all(16.0), // Add padding if needed
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              _buildTextField(_officeNameController, 'Office Name', officeName),
+                              _buildTextField(_offAddrController, 'Office Address', officeAddress),
+                              _buildTextField(_offPhoneController, 'Office Phone', officePhone),
+                              _buildTextField(_offEmailController, 'Office Email', officeEmail),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+
+                const SizedBox(height: 20),
+
+                // Save Button
+                _isLoading
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                  onPressed: _updateUserData,
+                  child: const Text('Save Changes'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+
+
+
+
+
 
   Widget _buildTextField(TextEditingController controller, String labelText, String? initialValue) {
     controller.text = initialValue ?? '';

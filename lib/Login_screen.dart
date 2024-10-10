@@ -261,8 +261,9 @@ class _LoginScreenState extends State<LoginScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const SizedBox(height: 70), // টেক্সট এবং ইমেজের মধ্যে স্থান
-            // সার্কুলার ইমেজ
+            const SizedBox(height: 70), // Space between text and image
+
+            // Circular Image
             Center(
               child: Container(
                 width: 140,
@@ -276,7 +277,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 20), // ইমেজ এবং টেক্সটের মধ্যে স্থান
+            const SizedBox(height: 20), // Space between image and text
+
+            // Phone Number TextField
             TextField(
               controller: _phoneController,
               decoration: InputDecoration(
@@ -290,6 +293,8 @@ class _LoginScreenState extends State<LoginScreen> {
               keyboardType: TextInputType.phone,
             ),
             const SizedBox(height: 20),
+
+            // Password TextField
             TextField(
               controller: _passwordController,
               obscureText: !_isPasswordVisible,
@@ -314,12 +319,14 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 25),
+
+            // Login Button
             Center(
               child: SizedBox(
                 width: MediaQuery
                     .of(context)
                     .size
-                    .width * 0.8, // রেস্পন্সিভ প্রস্থ
+                    .width * 0.8, // Responsive width
                 child: Container(
                   height: 50,
                   decoration: BoxDecoration(
@@ -360,7 +367,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 15),
+
+            // Forgot Password Button
             TextButton(
               onPressed: _forgotPassword,
               child: const Text(
@@ -368,17 +377,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: TextStyle(color: Colors.blue),
               ),
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 20),
+
+            // Sign Up Button
             Center(
               child: SizedBox(
                 width: MediaQuery
                     .of(context)
                     .size
-                    .width * 0.5, // রেস্পন্সিভ প্রস্থ
+                    .width * 0.3, // Responsive width
                 child: Container(
+                  height: 50,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(25),
+                    borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
                         color: const Color(0xFF000000),
@@ -388,62 +400,45 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
-                  child: SizedBox(
-                    height: 40,
-                    child: ElevatedButton(
-                      onPressed: _navigateToSignUp,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF27ae60),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                  child: ElevatedButton(
+                    onPressed: _navigateToSignUp,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF27ae60),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Text(
-                        'Sign Up',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    ),
+                    child: const Text(
+                      'Sign Up',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 20), // ইমেজ যোগ করার স্থান
+            const SizedBox(height: 55), // Space before images
 
-            // এখানে সাইন আপের নিচে ছবি যোগ করুন
+            // Image below Sign Up Button
             Center(
               child: Container(
-                width: 100, // ছবির প্রস্থ
-                height: 100, // ছবির উচ্চতা
+                width: 100, // Image width
+                height: 100, // Image height
                 decoration: BoxDecoration(
                   shape: BoxShape.rectangle,
                   image: DecorationImage(
                     image: AssetImage('assets/images/logooo.png'),
-                    // আপনার ছবির পাথ এখানে দিন
+                    // Your image path here
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
             ),
 
-            const SizedBox(height: 20), // Adjust this space as needed
-
-            // এখানে টেক্সট যোগ করুন
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: const Text(
-                'Alapon-NCA90',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: Colors.black,
-                ),
-              ),
-            ),
             const SizedBox(height: 20), // Adjust this space as needed
           ],
         ),
