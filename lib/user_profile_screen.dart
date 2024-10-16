@@ -1,13 +1,16 @@
 import 'dart:convert';
+import 'package:alumni/profession_list.dart';
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
 
 import 'Home_screen.dart';
+import 'addrees_api.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final User user; // Assuming User is a defined class with necessary fields
 
-  const UserProfileScreen({Key? key, required this.user}) : super(key: key);
+
+  UserProfileScreen({Key? key, required this.user}) : super(key: key);
 
   @override
   _UserProfileScreenState createState() => _UserProfileScreenState();
@@ -16,12 +19,43 @@ class UserProfileScreen extends StatefulWidget {
 class _UserProfileScreenState extends State<UserProfileScreen> with SingleTickerProviderStateMixin {
   late User _user;
   late TabController _tabController;
+  String? divisionDesc;
 
   @override
   void initState() {
     super.initState();
     _user = widget.user; // Initialize with the user passed from the previous screen
-    _tabController = TabController(length: 3, vsync: this); // Three tabs for addresses
+
+    // Initialize the TabController with the correct length (4 tabs)
+    _tabController = TabController(length: 4, vsync: this); // 4 tabs including Family Info
+
+    // Get division description and update it in the state
+    setState(() {
+      divisionDesc = getDivisionDesc(_user.preDiv ?? ""); // Handle null safely
+    });
+  }
+
+
+  // Function to get the profession description based on the code
+  String getProfessionDesc(String profCode) {
+    // Find the profession in the list using the code
+    final profession = professions.firstWhere(
+          (element) => element['PROF_CODE'] == profCode,
+      orElse: () => {'PROF_DESC': 'Unknown'}, // Default value if code is not found
+    );
+    return profession['PROF_DESC']!;
+  }
+
+
+  // Function to get the group description based on the code
+  // Function to get the category description based on the code
+  String getCategoryDesc(String catCode) {
+    // Find the category in the map using the code
+    final category = catCodes.keys.firstWhere(
+          (key) => catCodes[key] == catCode,
+      orElse: () => 'Unknown', // Default value if code is not found
+    );
+    return category;
   }
 
   // Function to decode Base64 string
@@ -37,6 +71,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
     }
   }
 
+  String getDivisionDesc(String divCode) {
+    final division = divisions.firstWhere(
+          (element) => element['DIV_CODE'] == divCode,
+      orElse: () => {'DIV_DESC': 'Unknown'}, // Default value if not found
+    );
+    return division['DIV_DESC']!;
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,20 +88,18 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
           "Alapon-NDC90",
           style: TextStyle(
             fontSize: 20,
-            color: Colors.white,// Adjust the font size as needed
-            fontWeight: FontWeight.bold, // Makes the text bold
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
         backgroundColor: Colors.greenAccent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(20), // Adjust the radius as needed
+            bottom: Radius.circular(20),
           ),
         ),
       ),
-
-
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -67,10 +108,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
               // Profile image at the top center
               Center(
                 child: CircleAvatar(
-                  radius: 50,
+                  radius:70,
                   backgroundImage: _user.memPhoto != null && _user.memPhoto!.isNotEmpty
-                      ? MemoryImage(decodeBase64(fixBase64(_user.memPhoto!)) ?? Uint8List(0)) // Ensure we are passing a non-nullable Uint8List
-                      : const AssetImage('assets/default_profile.png') as ImageProvider, // Fallback image
+                      ? MemoryImage(decodeBase64(fixBase64(_user.memPhoto!)) ?? Uint8List(0))
+                      : const AssetImage('assets/default_profile.png') as ImageProvider,
                 ),
               ),
               const SizedBox(height: 20),
@@ -105,11 +146,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
                         _buildReadOnlyTextField('Email', _user.preEmail!),
                       if (_user.collRollNo != null && _user.collRollNo!.isNotEmpty)
                         _buildReadOnlyTextField('Roll Number', _user.collRollNo!),
+                      if (_user.profCode != null && _user.profCode!.isNotEmpty)
+                        _buildReadOnlyTextField('Profession', getProfessionDesc(_user.profCode!)),
+                      if (_user.catCode != null && _user.catCode!.isNotEmpty)
+                        _buildReadOnlyTextField('Group', getCategoryDesc(_user.catCode!)),
+
+
+                      const SizedBox(height: 20),
 
                       // TabBar for additional fields placed below the Present Email
-                      const SizedBox(height: 20),
                       TabBar(
-
                         controller: _tabController,
                         indicator: BoxDecoration(
                           color: Color(0xFFC0392B), // Active tab color
@@ -121,22 +167,33 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
                           _buildTab('Present\nAddress'),
                           _buildTab('Permanent\nAddress'),
                           _buildTab('Office\nAddress'),
+                          _buildTab('Family\nInfo'),  // Added new tab for Family Info
                         ],
                       ),
 
-                      const SizedBox(height: 20), // Space between TabBar and TabBarView
+                      const SizedBox(height: 20),
+
+                      // TabBarView for showing the different sections
                       Container(
-                        height: 300, // Fixed height to prevent overflow
+                        height: 400, // Set a fixed height to prevent overflow
                         child: TabBarView(
                           controller: _tabController,
                           children: [
-                            _presentAddressTab(_user.preAddr, _user.prePhone, _user.preDiv, _user.preThana, _user.preDist, _user.prePostCode,_user.dom),
+                            _presentAddressTab(
+                              _user.preAddr,
+                              _user.prePhone,
+                              divisionDesc, // Pass the division description
+                              _user.preThana,
+                              _user.preDist,
+                              _user.prePostCode,
+                              _user.dom,
+                            ),
                             _permanentAddressTab(_user.perAddr, _user.perPhone, _user.perDiv, _user.perThana, _user.perDist),
                             _officeAddressTab(_user.offAddr, _user.offPhone, _user.offEmail),
+                            _familyInfoTab(_user.fName, _user.mName),  // Added Family Info Tab view
                           ],
                         ),
                       ),
-
                     ],
                   ),
                 ),
@@ -148,8 +205,67 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
     );
   }
 
+
+// Method to build the Family Info Tab
+  Widget _familyInfoTab(String? fatherName, String? motherName) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (fatherName != null && fatherName.isNotEmpty)
+            _buildReadOnlyTextField('Father\'s Name', fatherName),
+          if (motherName != null && motherName.isNotEmpty)
+            _buildReadOnlyTextField('Mother\'s Name', motherName),
+        ],
+      ),
+    );
+  }
+
+
+// Method to build a read-only TextField (box) for displaying information
+  Widget _buildReadOnlyTextField(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        initialValue: value,
+        readOnly: true,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          filled: true,
+          fillColor: Colors.grey[200],
+        ),
+        style: TextStyle(
+          color: Colors.black,
+        ),
+      ),
+    );
+  }
+
+
+// Function to create tabs with auto-fitting text for different screen sizes
+  Tab _buildTab(String label) {
+    return Tab(
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          label,
+          textAlign: TextAlign.center, // Ensure the text is centered
+          style: TextStyle(
+            fontSize: 16, // Initial font size, can adjust as needed
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+
   // Helper method to build a read-only text field with circular border and black text color
-  Widget _buildReadOnlyTextField(String labelText, String text) {
+  Widget _buildCustomReadOnlyTextField(String labelText, String text) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextField(
@@ -168,6 +284,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
     );
   }
 
+
   // Method to create a tab for Present Address fields
   Widget _presentAddressTab(String? preAddr, String? prePhone, String? preDiv, String? preThana, String? preDist, String? prePostCode,String? dom) {
     print('DOM value: $dom');
@@ -183,7 +300,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
           if (preThana != null && preThana!.isNotEmpty) _buildReadOnlyTextField('Thana', preThana!),
           if (preDist != null && preDist!.isNotEmpty) _buildReadOnlyTextField('District', preDist!),
           if (prePostCode != null && prePostCode!.isNotEmpty) _buildReadOnlyTextField('Postcode', prePostCode!),
-          if (dom != null && dom!.isNotEmpty) _buildReadOnlyTextField('Date Of Membership', dom!),
+          if (dom != null && dom!.isNotEmpty) _buildReadOnlyTextField('Date Of Marriage', dom!),
         ],
 
       ),
@@ -223,7 +340,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
   }
 
   // Helper method to build a custom tab
-  Widget _buildTab(String title) {
+  Widget _pbuildTab(String title) {
     return Tab(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

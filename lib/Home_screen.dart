@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:typed_data'; // for handling binary data
 
 class User {
-  final String memId; // Add this property
+  final String memId;
   final String memName;
   final String memMobileNo;
   final String? fName;
@@ -26,24 +26,24 @@ class User {
   final String? offEmail;
   final String? dob;
   final String? designation;
-  final String? memPhoto; // Add this property
-  final String? collRollNo; // Add this property
+  final String? memPhoto; // This will hold the base64 image data
+  final String? collRollNo;
   final String? yrOfPass;
-  final String? catCode; // Add this property
-  final String? collSec; // New property
-  final String? dom; // New property
-  final String? preDiv; // New property
-  final String? preDist; // New property
-  final String? preThana; // New property
-  final String? perDist; // New property
-  final String? perThana; // New property
-  final String? profCode; // New property
-  final String? prePostCode; // New property
+  final String? catCode;
+  final String? collSec;
+  final String? dom;
+  final String? preDiv;
+  final String? preDist;
+  final String? preThana;
+  final String? perDist;
+  final String? perThana;
+  final String? profCode;
+  final String? prePostCode;
+  final String? perDiv;
   final String? memType;
-  final String? perDiv;// New property
 
   User({
-    required this.memId, // Update constructor
+    required this.memId,
     required this.memName,
     required this.memMobileNo,
     this.fName,
@@ -64,24 +64,22 @@ class User {
     this.collRollNo,
     this.yrOfPass,
     this.catCode,
-    this.collSec, // Initialize new property
-    this.dom, // Initialize new property
-    this.preDiv, // Initialize new property
-    this.preDist, // Initialize new property
-    this.preThana, // Initialize new property
-    this.perDist, // Initialize new property
-    this.perThana, // Initialize new property
-    this.profCode, // Initialize new property
-    this.prePostCode, // Initialize new property
+    this.collSec,
+    this.dom,
+    this.preDiv,
+    this.preDist,
+    this.preThana,
+    this.perDist,
+    this.perThana,
+    this.profCode,
+    this.prePostCode,
     this.perDiv,
     this.memType,
-    // Initialize new property
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      memId: json['MEM_ID'] ?? '', // Ensure to include this in the factory
-      memPhoto: json['MEM_PHOTO']?.toString(), // Include this in the factory
+      memId: json['MEM_ID'] ?? '',
       memName: json['MEM_NAME'] ?? '',
       memMobileNo: json['MEM_MOBILE_NO'] ?? '',
       fName: json['F_NAME'],
@@ -98,9 +96,21 @@ class User {
       offEmail: json['OFF_EMAIL'],
       dob: json['DOB'],
       designation: json['DESIGNATION'],
+      memPhoto: json['MEM_PHOTO'], // base64 image data
       collRollNo: json['COLL_ROLL_NO'],
       yrOfPass: json['YR_OF_PASS'],
-      dom: json['Date_of_Membership']
+      catCode: json['CAT_CODE'],
+      collSec: json['COLL_SEC'],
+      dom: json['Date_of_Membership'],
+      preDiv: json['PRE_DIV'],
+      preDist: json['PRE_DIST'],
+      preThana: json['PRE_THANA'],
+      perDist: json['PER_DIST'],
+      perThana: json['PER_THANA'],
+      profCode: json['PROF_CODE'],
+      prePostCode: json['PRE_POST_CODE'],
+      perDiv: json['PER_DIV'],
+      memType: json['MEM_TYPE'],
     );
   }
 }
@@ -444,7 +454,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Define sub-options based on the category selected
     if (filterCategory == 'Group') {
-      subOptions = ['Bangla', 'English', 'Science'];
+      subOptions = ['Humanities', 'Business Studies', 'Science(Eng. Version)','Science(Bangla)'];
     } else if (filterCategory == 'Profession') {
       subOptions = ['Doctor', 'Engineer', 'Banker', 'Businessman'];
     } else if (filterCategory == 'Blood Group') {

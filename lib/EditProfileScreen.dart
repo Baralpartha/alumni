@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:alumni/profession_list.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -48,7 +49,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _profCodeController; // For professional code
   late TextEditingController _domController; // For date of membership
   late TextEditingController _prePostCodeController; // For present post code
-  late TextEditingController _memTypeController; // For member type
+  late TextEditingController _memTypeController;
+  late TextEditingController _collrollnameController ;// For member type
 
   bool _isLoading = false;
 
@@ -93,6 +95,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? memType = ""; // Added for member type
 // Added for designation
 
+  String? selectedProfession;
+  String? selectedCategory;
+
 
   File? _pickedImage; // To store the picked image
   final ImagePicker _picker = ImagePicker(); // Image picker instance
@@ -134,6 +139,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _domController = TextEditingController(text: widget.user.dom ?? '');
     _prePostCodeController = TextEditingController(text: widget.user.prePostCode ?? '');
     _memTypeController = TextEditingController(text: widget.user.memType ?? '');
+    _collrollnameController = TextEditingController(text: widget.user.collRollNo ?? '');
+
   }
 
 
@@ -145,7 +152,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       savedPassword = prefs.getString('password') ?? '';
       username = prefs.getString("username") ?? '';
       usercollrollname = prefs.getString("usercollrollname") ?? '';
-      usermemphoto = prefs.getString("usermemphoto") ?? '';
+      usermemphoto = prefs.getString("memPhoto") ?? '';
       fathername = prefs.getString("fathername") ?? '';
       mothername = prefs.getString("mothername") ?? '';
       presentAddress = prefs.getString("presentaddress") ?? '';
@@ -175,9 +182,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       dom = prefs.getString("dom") ?? ''; // Added for date of membership
       prePostCode = prefs.getString("pre_post_code") ?? ''; // Added for present post code
       memType = prefs.getString("membertype") ?? ''; // Added for member type
-    });
-  }
 
+      selectedProfession = profCode; // Set selectedProfession to profCode
+      selectedCategory=catCode;//set selectedProfession to catcode
+    });
+
+    print('---------------------$usermemphoto-----------------------');
+  }
 
 
   Uint8List? decodeBase64(String base64String) {
@@ -234,24 +245,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       'dob': _dobController.text,
       'designation': _designationController.text,
       // Additional fields
-      'cat_code': _catCodeController.text,
+      'cat_code': selectedCategory,
       'coll_sec': _collSecController.text,
       'yr_of_pass': _yrOfPassController.text,
-      'pre_div': _preDivController.text,
-      'pre_dist': _preDistController.text,
-      'pre_thana': _preThanaController.text,
-      'per_div': _perDivController.text,
-      'per_dist': _perDistController.text,
-      'per_thana': _perThanaController.text,
-      'prof_code': _profCodeController.text,
+      'pre_div': selectedPreDivision,
+      'pre_dist': selectedPreDistrict,
+      'pre_thana': selectedPreThana,
+      'per_div': selectedPerDivision,
+      'per_dist': selectedPerDistrict,
+      'per_thana': selectedPerThana,
+      'prof_code': selectedProfession,
       'dom': _domController.text,
       'pre_post_code': _prePostCodeController.text,
       'mem_type': _memTypeController.text,
-    };
-    // Prepare the request body
-    final Map<String, dynamic> requestBody = {
-      'user_id':memId, // Include other necessary fields based on your API requirements
-      'prof_code': selectedProfCode,
+      'collRoll_Num': _collrollnameController.text,
     };
 
     try {
@@ -270,6 +277,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
         // Update local state with the new data
 
+        print('----------------Professional Code $selectedProfession ---------------------');
         // Optionally, you can navigate back or refresh the user data
         Navigator.pop(context, true); // Go back to the previous screen
       } else {
@@ -291,47 +299,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-// Function to update local user data in the UI
-  void _updateLocalUserData(Map<String, dynamic> updatedData) {
-    // Update the local variables or state management logic with the updated data
-    // For example:
-    _nameController.text = updatedData['mem_name'] ?? '';
-    _mobileController.text = updatedData['mem_mobile_no'] ?? '';
-    _fNameController.text = updatedData['f_name'] ?? '';
-    _mNameController.text = updatedData['m_name'] ?? '';
-    _preAddrController.text = updatedData['pre_addr'] ?? '';
-    _prePhoneController.text = updatedData['pre_phone'] ?? '';
-    _preEmailController.text = updatedData['pre_email'] ?? '';
-    _perAddrController.text = updatedData['per_addr'] ?? '';
-    _perPhoneController.text = updatedData['per_phone'] ?? '';
-    _perEmailController.text = updatedData['per_email'] ?? '';
-    _officeNameController.text = updatedData['office_name'] ?? '';
-    _offAddrController.text = updatedData['off_addr'] ?? '';
-    _offPhoneController.text = updatedData['off_phone'] ?? '';
-    _offEmailController.text = updatedData['off_email'] ?? '';
-    _dobController.text = updatedData['dob'] ?? '';
-    _designationController.text = updatedData['designation'] ?? '';
-    // Update additional fields as necessary...
-  }
-
-
-
   // Function to pick image from the gallery
   Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
-        _pickedImage = File(pickedFile.path); // Store the image file
+        _pickedImage = File(pickedFile.path);  // Set the picked image
       });
-
-      // Encode the image to Base64
-      String base64Image = await _encodeImageToBase64(_pickedImage!);
-
-      // Here you can use `base64Image` to include in your database
-      // Example: saveToDatabase(base64Image);
     }
   }
+
 
 // Function to encode image to Base64
   Future<String> _encodeImageToBase64(File image) async {
@@ -357,9 +334,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? selectedPerDivision;
   String? selectedPerDistrict;
   String? selectedPerThana;
-  String? selectedProfCode;
 
-  List<dynamic> profCodes = [];
   List<dynamic> divisions = [];
   List<dynamic> districts = [];
   List<dynamic> thanas = [];
@@ -380,9 +355,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final data = jsonDecode(response.body);
       setState(() {
         divisions = data['data'];
+        if (divisions.isNotEmpty) {
+          print("pre dist============================================ProfCode: ${profCode}");
+          // Set initial selected value for divisions
+          selectedPreDivision = divisions[int.parse(preDiv!)-1]['DIV_CODE']; // Assuming the key is 'division_code'
+          selectedPerDivision = divisions[int.parse(perDiv!)-1]['DIV_CODE'];
+          print("=====================pre div: $selectedPreDivision");
+          // Fetch districts for the initial division
+          fetchDistricts(selectedPreDivision!, true); // For present address
+          fetchDistricts(selectedPerDivision!, false); // For permanent address
+        }
       });
     }
   }
+
 
   // Fetch Districts based on division code
   Future<void> fetchDistricts(String divCode, bool isPresent) async {
@@ -392,16 +378,40 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       setState(() {
         if (isPresent) {
           preDistricts = data['data'];
-          selectedPreDistrict = null; // Reset district dropdown
-          selectedPreThana = null;    // Reset thana dropdown
+          print(preDistricts);
+          if (preDistricts.isNotEmpty) {
+            // Find the district that matches the preDist value, don't use it as an index
+            selectedPreDistrict = preDistricts.firstWhere(
+                  (district) => district['DIST_CODE'] == preDist,
+              orElse: () => null,
+            )?['DIST_CODE'];
+
+            if (selectedPreDistrict != null) {
+              fetchThanas(selectedPreDistrict!, true); // Fetch Thanas for the selected district
+            }
+            print("================pre District: $selectedPreDistrict");
+          }
         } else {
           perDistricts = data['data'];
-          selectedPerDistrict = null;
-          selectedPerThana = null;
+          if (perDistricts.isNotEmpty) {
+            // Find the district that matches the perDist value
+            selectedPerDistrict = perDistricts.firstWhere(
+                  (district) => district['DIST_CODE'] == perDist,
+              orElse: () => null,
+            )?['DIST_CODE'];
+
+            if (selectedPerDistrict != null) {
+              fetchThanas(selectedPerDistrict!, false); // Fetch Thanas for the selected district
+            }
+          }
         }
+        selectedPreThana = null;  // Reset Thana for new district
+        selectedPerThana = null;
       });
     }
   }
+
+
 
   // Fetch Thanas based on district code
   Future<void> fetchThanas(String distCode, bool isPresent) async {
@@ -411,19 +421,33 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       setState(() {
         if (isPresent) {
           preThanas = data['data'];
-          selectedPreThana = null; // Reset thana dropdown
+          if (preThanas.isNotEmpty) {
+            // Find the thana that matches the preThana value
+            selectedPreThana = preThanas.firstWhere(
+                  (thana) => thana['THANA_CODE'] == preThana,
+              orElse: () => null,
+            )?['THANA_CODE'];
+          }
         } else {
           perThanas = data['data'];
-          selectedPerThana = null;
+          if (perThanas.isNotEmpty) {
+            // Find the thana that matches the perThana value
+            selectedPerThana = perThanas.firstWhere(
+                  (thana) => thana['THANA_CODE'] == perThana,
+              orElse: () => null,
+            )?['THANA_CODE'];
+          }
         }
       });
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3, // Number of tabs
+      length: 4, // Increased number of tabs to 4
       child: Scaffold(
         appBar: AppBar(
           title: Text(
@@ -441,194 +465,264 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
           ),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                // User Profile Photo with image picker
-                GestureDetector(
-                  onTap: _pickImage,
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundImage: _pickedImage != null
-                        ? FileImage(_pickedImage!)
-                        : usermemphoto != null && usermemphoto!.isNotEmpty
-                        ? MemoryImage(decodeBase64(usermemphoto!)!)
-                        : const AssetImage('assets/default_profile.png') as ImageProvider,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // User Information Fields
-                _buildTextField(_nameController, 'Name', username),
-                _buildTextField(_mobileController, 'Phone number', savedPhone),
-                _buildTextField(_fNameController, 'Father\'s Name', fathername),
-                _buildTextField(_mNameController, 'Mother\'s Name', mothername),
-
-                const SizedBox(height: 10),
-
-                // Tab Bar for addresses
-                TabBar(
-                  tabs: [
-                    Tab(
-                      child: Container(
-                        height: 60.0, // Set a common height for all tabs
-                        decoration: BoxDecoration(
-                          color: Color(0xFFC0392B), // Set background color
-                          borderRadius: BorderRadius.circular(8.0), // Optional: add rounded corners
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text("Present", style: TextStyle(color: Colors.white)),
-                            Text("Address", style: TextStyle(color: Colors.white)),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Tab(
-                      child: Container(
-                        height: 60.0, // Set a common height for all tabs
-                        decoration: BoxDecoration(
-                          color: Color(0xFFC0392B), // Set background color
-                          borderRadius: BorderRadius.circular(8.0), // Optional: add rounded corners
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text("Permanent", style: TextStyle(color: Colors.white)),
-                            Text("Address", style: TextStyle(color: Colors.white)),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Tab(
-                      child: Container(
-                        height: 60.0, // Set a common height for all tabs
-                        decoration: BoxDecoration(
-                          color: Color(0xFFC0392B), // Set background color
-                          borderRadius: BorderRadius.circular(8.0), // Optional: add rounded corners
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text("Office", style: TextStyle(color: Colors.white)),
-                            Text("Address", style: TextStyle(color: Colors.white)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-
-                const SizedBox(height:20),
-                // Tab view for addresses
-                SizedBox(
-                  height: 400, // Adjust height as needed
-                  child: TabBarView(
+        body: Column(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SingleChildScrollView(
+                  child: Column(
                     children: [
-                      // Present Address Tab
-                      Container(
-                        padding: const EdgeInsets.all(16.0), // Add padding if needed
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              _buildTextField(_preAddrController, 'Present Address', presentAddress),
-                              _buildTextField(_prePhoneController, 'Present Phone', presentPhone),
-                              _buildTextField(_preEmailController, 'Present Email', presentEmail),
-                              _buildDropdown('Present Division', selectedPreDivision, divisions, (value) {
-                                setState(() {
-                                  selectedPreDivision = value;
-                                  fetchDistricts(value!, true); // Fetch districts for present address
-                                });
-                              }),
-                              _buildDropdown('Present District', selectedPreDistrict, preDistricts, (value) {
-                                setState(() {
-                                  selectedPreDistrict = value;
-                                  fetchThanas(value!, true); // Fetch thanas for present address
-                                });
-                              }),
-                              _buildDropdown('Present Thana', selectedPreThana, preThanas, (value) {
-                                setState(() {
-                                  selectedPreThana = value;
-                                });
-                              }),
-                              _buildTextField(_prePostCodeController, 'Present Post Code', prePostCode),
-                            ],
-                          ),
+                      // User Profile Photo with image picker
+                      GestureDetector(
+                        onTap: _pickImage,  // Function to pick image
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundImage: _pickedImage != null
+                              ? FileImage(_pickedImage!) // Show picked image
+                              : (usermemphoto != null && usermemphoto!.isNotEmpty
+                              ? MemoryImage(decodeBase64(fixBase64(usermemphoto!)) ?? Uint8List(0)) // Show memory image
+                              : const AssetImage('assets/default_profile.png')) as ImageProvider, // Show default image if none selected
                         ),
                       ),
 
-                      // Permanent Address Tab
-                      Container(
-                        padding: const EdgeInsets.all(16.0), // Add padding if needed
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              _buildTextField(_perAddrController, 'Permanent Address', permanentAddress),
-                              _buildTextField(_perPhoneController, 'Permanent Phone', permanentPhone),
-                              _buildTextField(_perEmailController, 'Permanent Email', permanentEmail),
-                              _buildDropdown('Permanent Division', selectedPerDivision, divisions, (value) {
-                                setState(() {
-                                  selectedPerDivision = value;
-                                  fetchDistricts(value!, false); // Fetch districts for permanent address
-                                });
-                              }),
-                              _buildDropdown('Permanent District', selectedPerDistrict, perDistricts, (value) {
-                                setState(() {
-                                  selectedPerDistrict = value;
-                                  fetchThanas(value!, false); // Fetch thanas for permanent address
-                                });
-                              }),
-                              _buildDropdown('Permanent Thana', selectedPerThana, perThanas, (value) {
-                                setState(() {
-                                  selectedPerThana = value;
-                                });
-                              }),
-                            ],
+                      const SizedBox(height: 20),
+
+                      // User Information Fields
+                      _buildTextField(_nameController, 'Name', username),
+                      _buildTextField(_mobileController, 'Phone number', savedPhone),
+
+                      _buildDropdownProf('Profession', selectedProfession, professions, (value) {
+                        setState(() {
+                          selectedProfession = value;
+                          print("---------------------------Selected Profession: $selectedProfession");
+                        });
+                      }),
+                      _buildTextField(_collrollnameController, 'Roll Number', usercollrollname),
+                      _buildDropdownCat('Group', selectedCategory, catCodes, (value) {
+                        setState(() {
+                          selectedCategory = value;
+                          print("---------------------------Selected Category: $selectedCategory");
+                        });
+                      }),
+
+                      const SizedBox(height: 10),
+
+                      // Tab Bar with the new "Family Info" tab
+                      TabBar(
+                        tabs: [
+                          Tab(
+                            child: Container(
+                              height: 60.0,
+                              decoration: BoxDecoration(
+                                color: Color(0xFFC0392B),
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text("Present", style: TextStyle(color: Colors.white)),
+                                    Text("Address", style: TextStyle(color: Colors.white)),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                          Tab(
+                            child: Container(
+                              height: 60.0,
+                              decoration: BoxDecoration(
+                                color: Color(0xFFC0392B),
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text("Permanent", style: TextStyle(color: Colors.white)),
+                                    Text("Address", style: TextStyle(color: Colors.white)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          Tab(
+                            child: Container(
+                              height: 60.0,
+                              decoration: BoxDecoration(
+                                color: Color(0xFFC0392B),
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text("Office", style: TextStyle(color: Colors.white)),
+                                    Text("Address", style: TextStyle(color: Colors.white)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          Tab(
+                            child: Container(
+                              height: 60.0,
+                              decoration: BoxDecoration(
+                                color: Color(0xFFC0392B),
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text("Family", style: TextStyle(color: Colors.white)),
+                                    Text("Info", style: TextStyle(color: Colors.white)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
 
-                      // Office Address Tab
-                      Container(
-                        padding: const EdgeInsets.all(16.0), // Add padding if needed
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              _buildTextField(_officeNameController, 'Office Name', officeName),
-                              _buildTextField(_offAddrController, 'Office Address', officeAddress),
-                              _buildTextField(_offPhoneController, 'Office Phone', officePhone),
-                              _buildTextField(_offEmailController, 'Office Email', officeEmail),
-                            ],
-                          ),
+                      const SizedBox(height: 20),
+
+                      // Tab view for addresses and family info
+                      SizedBox(
+                        height: 400, // Adjust height as needed
+                        child: TabBarView(
+                          children: [
+                            // Present Address Tab
+                            Container(
+                              padding: const EdgeInsets.all(16.0),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    _buildTextField(_preAddrController, ' Address', presentAddress),
+                                    _buildTextField(_prePhoneController, ' Phone', presentPhone),
+                                    _buildTextField(_preEmailController, 'Email', presentEmail),
+                                    _buildDropdown(' Division', selectedPreDivision, divisions, (value) {
+                                      setState(() {
+                                        selectedPreDivision = value;
+                                        fetchDistricts(value!, true); // Fetch districts for present address
+                                      });
+                                    }),
+                                    _buildDropdown('District', selectedPreDistrict, preDistricts, (value) {
+                                      setState(() {
+                                        selectedPreDistrict = value;
+                                        fetchThanas(value!, true); // Fetch thanas for present address
+                                      });
+                                    }),
+                                    _buildDropdown(' Thana', selectedPreThana, preThanas, (value) {
+                                      setState(() {
+                                        selectedPreThana = value;
+                                      });
+                                    }),
+                                    _buildTextField(_prePostCodeController, ' Post Code', prePostCode),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            // Permanent Address Tab
+                            Container(
+                              padding: const EdgeInsets.all(16.0),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    _buildTextField(_perAddrController, ' Address', permanentAddress),
+                                    _buildTextField(_perPhoneController, ' Phone', permanentPhone),
+                                    _buildTextField(_perEmailController, ' Email', permanentEmail),
+                                    _buildDropdown(' Division', selectedPerDivision, divisions, (value) {
+                                      setState(() {
+                                        selectedPerDivision = value;
+                                        fetchDistricts(value!, false); // Fetch districts for permanent address
+                                      });
+                                    }),
+                                    _buildDropdown(' District', selectedPerDistrict, perDistricts, (value) {
+                                      setState(() {
+                                        selectedPerDistrict = value;
+                                        fetchThanas(value!, false); // Fetch thanas for permanent address
+                                      });
+                                    }),
+                                    _buildDropdown('Permanent Thana', selectedPerThana, perThanas, (value) {
+                                      setState(() {
+                                        selectedPerThana = value;
+                                      });
+                                    }),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            // Office Address Tab
+                            Container(
+                              padding: const EdgeInsets.all(16.0),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    _buildTextField(_officeNameController, 'Office Name', officeName),
+                                    _buildTextField(_offAddrController, 'Office Address', officeAddress),
+                                    _buildTextField(_offPhoneController, 'Office Phone', officePhone),
+                                    _buildTextField(_offEmailController, 'Office Email', officeEmail),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            // Family Info Tab
+                            Container(
+                              padding: const EdgeInsets.all(16.0),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    _buildTextField(_fNameController, 'Father\'s Name', fathername),
+                                    _buildTextField(_mNameController, 'Mother\'s Name', mothername),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-
-
-                const SizedBox(height: 20),
-
-                // Save Button
-                _isLoading
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton(
-                  onPressed: _updateUserData,
-                  child: const Text('Save Changes'),
-                ),
-              ],
+              ),
             ),
-          ),
+
+            // Save Button fixed at the bottom
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: _isLoading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                onPressed: _updateUserData,
+                child: const Text('Save Changes'),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
 
+
+
+
+
+
+
+  // Helper method to fix the Base64 string before decoding
+  String fixBase64(String base64) {
+    return base64.replaceAll('data:image/png;base64,', '').replaceAll(' ', '+');
+  }
 
 
 
@@ -673,6 +767,7 @@ Widget _buildDropdown(String label, String? selectedValue, List<dynamic> items, 
       isExpanded: true,
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: const TextStyle(color: Color(0xFFC0392B)),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(30.0)),
       ),
       items: items.map<DropdownMenuItem<String>>((item) {
@@ -685,4 +780,57 @@ Widget _buildDropdown(String label, String? selectedValue, List<dynamic> items, 
     ),
   );
 }
+
+
+
+Widget _buildDropdownProf(String label, String? selectedValue, List<dynamic> items, Function(String?) onChanged) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 16.0),
+    child: DropdownButtonFormField<String>(
+      value: selectedValue, // Allow null here if no initial value is selected
+      isExpanded: true,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Color(0xFFC0392B)),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(30.0)),
+      ),
+      items: items.map<DropdownMenuItem<String>>((item) {
+        // Handle nulls safely
+        final value = item['DIV_CODE'] ?? item['DIST_CODE'] ?? item['THANA_CODE'] ?? item['PROF_CODE'];
+        final description = item['DIV_DESC'] ?? item['DIST_DESC'] ?? item['THANA_DESC'] ?? item['PROF_DESC'];
+
+        return DropdownMenuItem<String>(
+          value: value, // This can be null if no code is found
+          child: Text(description ?? ''), // Use empty string if description is null
+        );
+      }).toList(),
+      onChanged: onChanged, // Allow null handling here too
+    ),
+  );
+}
+
+
+/////selectedCategory
+
+Widget _buildDropdownCat(String hint, String? selectedValue, Map<String, String> items, Function(String?)? onChanged) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 16.0), // Add padding to match the first function
+    child: DropdownButtonFormField<String>(
+      decoration: InputDecoration(
+        labelText: hint,
+        labelStyle: const TextStyle(color: Color(0xFFC0392B)),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(30.0)), // Match border radius
+      ),
+      value: selectedValue,
+      onChanged: onChanged,
+      items: items.entries.map((entry) {
+        return DropdownMenuItem<String>(
+          value: entry.value,
+          child: Text(entry.key),
+        );
+      }).toList(),
+    ),
+  );
+}
+
 

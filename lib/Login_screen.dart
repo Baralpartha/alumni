@@ -76,6 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
           String memId = data['user']['mem_id']?.toString() ?? 'Unknown ID';
           String memMobileNo = data['user']['mem_mobile_no']?.toString() ??
               'Unknown Mobile';
+          String memPhoto = data['user']['mem_photo'] ?? 'Unknown Photo';
           String collRollNo = data['user']['coll_roll_no']?.toString() ??
               'Unknown Roll No';
           String catCode = data['user']['cat_code'] ?? 'Unknown Category Code';
@@ -130,6 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
           // Save user data to SharedPreferences
           final pref = await SharedPreferences.getInstance();
           await pref.setString("memid", memId);
+          await pref.setString("memphoto", memPhoto);
           await pref.setString("userphone", memMobileNo);
           await pref.setString("username", username);
           await pref.setString("usercollrollname", collRollNo);
@@ -163,6 +165,9 @@ class _LoginScreenState extends State<LoginScreen> {
           await pref.setString("dom", dom);
           await pref.setString("pre_post_code", prePostCode);
           await pref.setString("membertype", memType);
+
+          print('Pre District ================================== ${profCode}');
+          print('----------------------------$memPhoto ---------------------------');
 
 
           // Save credentials if successful

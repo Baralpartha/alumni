@@ -21,6 +21,7 @@ dependencies:
   liquid_progress_indicator: ^0.4.0 # or the latest version
   path_provider: ^2.0.9
   flutter_image_compress: ^1.1.0
+  auto_size_text: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -33,13 +34,15 @@ flutter:
 
   # Adding assets
   assets:
-    - assets/images/hic.jpg
+    - assets/images/sliderb.jpg
     - assets/images/slider1.png
     - assets/images/slidera.jpg
     - assets/images/ndccc.png
     - assets/images/logooo.png
+    - assets/images/sliderc.jpg
+    - assets/images/sliderb.jpg
 
-  # Splash screen configuration added here
+
 
 
 

@@ -54,14 +54,15 @@ class _CarouselScreenState extends State<CarouselScreen> {
             options: CarouselOptions(
               height: carouselHeight, // Use responsive height here
               autoPlay: true,
-              autoPlayInterval: Duration(seconds: 3),
+              autoPlayInterval: Duration(seconds: 5),
               enlargeCenterPage: true,
               viewportFraction: 0.9,
               aspectRatio: 16 / 9,
             ),
             items: [
               _carouselItem('assets/images/slider1.png', 'Explore Opportunities', 'Join our network and grow.'),
-              _carouselItem('assets/images/slidera.jpg', 'Stay Connected', 'Be a part of our alumni community.'),
+              _carouselItem('assets/images/sliderb.jpg', 'Stay Connected', 'Be a part of our alumni community.'),
+              _carouselItem('assets/images/sliderc.jpg', 'Stay Connected', 'Be a part of our alumni community.'),
             ],
           ),
           const Spacer(),
