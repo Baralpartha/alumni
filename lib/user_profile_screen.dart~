@@ -9,8 +9,7 @@ import 'addrees_api.dart';
 class UserProfileScreen extends StatefulWidget {
   final User user; // Assuming User is a defined class with necessary fields
 
-
-  UserProfileScreen({Key? key, required this.user}) : super(key: key);
+  const UserProfileScreen({Key? key, required this.user}) : super(key: key);
 
   @override
   _UserProfileScreenState createState() => _UserProfileScreenState();
@@ -19,17 +18,12 @@ class UserProfileScreen extends StatefulWidget {
 class _UserProfileScreenState extends State<UserProfileScreen> with SingleTickerProviderStateMixin {
   late User _user;
   late TabController _tabController;
-  String? divisionDesc;
 
   @override
   void initState() {
     super.initState();
     _user = widget.user; // Initialize with the user passed from the previous screen
     _tabController = TabController(length: 3, vsync: this); // Three tabs for addresses
-    // var divisionDesc = getDivisionDesc(_user.preDiv!);
-    setState(() {
-      divisionDesc = getDivisionDesc(_user.preDiv!);
-    });
   }
 
   // Function to get the profession description based on the code
