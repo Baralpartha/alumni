@@ -422,6 +422,13 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
+                title: const Text('All'),
+                onTap: () {
+                  Navigator.pop(context); // Close the bottom sheet
+                  _showSubFilterOptions(context, 'all');
+                },
+              ),
+              ListTile(
                 title: const Text('Group'),
                 onTap: () {
                   Navigator.pop(context); // Close the bottom sheet
@@ -454,11 +461,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Define sub-options based on the category selected
     if (filterCategory == 'Group') {
-      subOptions = ['Humanities', 'Business Studies', 'Science(Eng. Version)','Science(Bangla)'];
+      subOptions = [
+        'All', // Always first
+        'Humanities',
+        'Business Studies',
+        'Science(Eng. Version)',
+        'Science(Bangla)',
+      ];
     } else if (filterCategory == 'Profession') {
-      subOptions = ['Doctor', 'Engineer', 'Banker', 'Businessman'];
+      subOptions = [
+        'All', // Always first
+        'Doctor',
+        'Engineer',
+        'Banker',
+        'Businessman',
+      ];
     } else if (filterCategory == 'Blood Group') {
-      subOptions = ['AB+', 'O+', 'A+', 'B+'];
+      subOptions = [
+        'All', // Always first
+        'AB+',
+        'O+',
+        'A+',
+        'B+',
+      ];
     }
 
     // Show a dialog with sub-options based on the selected category
@@ -474,8 +499,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: Text(option),
                 onTap: () {
                   setState(() {
-                    selectedFilter = option; // Set the selected filter
-                    _filterUsers(_searchController.text); // Apply the filter
+                    if (option == 'All') {
+                      // Handle "All" option to show all users
+                      selectedFilter = null; // Reset the filter
+                      _filterUsers(''); // Pass an empty string to show all users
+                    } else {
+                      selectedFilter = option; // Set the selected filter
+                      _filterUsers(_searchController.text); // Apply the filter
+                    }
                   });
                   Navigator.pop(context); // Close the sub-filter dialog
                 },

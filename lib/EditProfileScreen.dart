@@ -491,6 +491,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       // User Information Fields
                       _buildTextField(_nameController, 'Name', username),
                       _buildTextField(_mobileController, 'Phone number', savedPhone),
+                      _buildTextField(_designationController, 'Designation', designation),
 
                       _buildDropdownProf('Profession', selectedProfession, professions, (value) {
                         setState(() {
@@ -505,6 +506,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           print("---------------------------Selected Category: $selectedCategory");
                         });
                       }),
+                      _buildTextField(_dobController, 'Date Of Birth',dob),
+                      _buildTextField(_domController, 'Date Of Marriage',dom),
 
                       const SizedBox(height: 10),
 
