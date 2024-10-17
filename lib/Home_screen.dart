@@ -420,6 +420,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               ListTile(
                 title: const Text('Group'),
+                trailing: const Icon(Icons.arrow_drop_down), // Add a right-aligned dropdown icon
                 onTap: () {
                   Navigator.pop(context); // Close the bottom sheet
                   _showSubFilterOptions(context, 'Group');
@@ -427,6 +428,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 title: const Text('Profession'),
+                trailing: const Icon(Icons.arrow_drop_down), // Add a right-aligned dropdown icon
                 onTap: () {
                   Navigator.pop(context); // Close the bottom sheet
                   _showSubFilterOptions(context, 'Profession');
@@ -434,6 +436,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 title: const Text('Blood Group'),
+                trailing: const Icon(Icons.arrow_drop_down), // Add a right-aligned dropdown icon
                 onTap: () {
                   Navigator.pop(context); // Close the bottom sheet
                   _showSubFilterOptions(context, 'Blood Group');
