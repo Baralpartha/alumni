@@ -1,3 +1,4 @@
+import 'package:alumni/profession_list.dart';
 import 'package:flutter/material.dart';
 import 'user_profile_screen.dart';
 import 'login_screen.dart';
@@ -175,17 +176,21 @@ class _HomeScreenState extends State<HomeScreen> {
   void _filterUsers(String query) {
     setState(() {
       filteredUserList = userList.where((user) {
-        final matchesQuery = user.memName.toLowerCase().contains(
-            query.toLowerCase()) ||
+        final matchesQuery = user.memName.toLowerCase().contains(query.toLowerCase()) ||
             user.memMobileNo.contains(query);
         final matchesFilter = selectedFilter == null || selectedFilter == 'All'
             ? true // Show all if 'All' is selected
-            : user.designation ==
-            selectedFilter; // Adjust this to your criteria
+            : (filterCategory == 'Group'
+            ? user.catCode == selectedFilter // Match with user.catCode if filter is Group
+            : filterCategory == 'Profession'
+            ? user.profCode == selectedFilter // Match with user.profCode if filter is Profession
+            : false); // Default case
         return matchesQuery && matchesFilter;
       }).toList();
     });
   }
+
+
 
   // Fetch the logged-in user's data from SharedPreferences
   void _getLoggedInUserData() async {
@@ -288,15 +293,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           centerTitle: true,
           backgroundColor: Colors.greenAccent,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-              );
-            },
-          ),
+
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(
               bottom: Radius.circular(20), // Adjust the radius as needed
@@ -422,13 +419,6 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: const Text('All'),
-                onTap: () {
-                  Navigator.pop(context); // Close the bottom sheet
-                  _showSubFilterOptions(context, 'all');
-                },
-              ),
-              ListTile(
                 title: const Text('Group'),
                 onTap: () {
                   Navigator.pop(context); // Close the bottom sheet
@@ -456,34 +446,18 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  String? filterCategory; // Declare filterCategory at the class level
+
   void _showSubFilterOptions(BuildContext context, String filterCategory) {
-    List<String> subOptions = [];
+    List<Map<String, String>> subOptions = [];
 
     // Define sub-options based on the category selected
     if (filterCategory == 'Group') {
-      subOptions = [
-        'All', // Always first
-        'Humanities',
-        'Business Studies',
-        'Science(Eng. Version)',
-        'Science(Bangla)',
-      ];
+      subOptions = group; // Use the group list
     } else if (filterCategory == 'Profession') {
-      subOptions = [
-        'All', // Always first
-        'Doctor',
-        'Engineer',
-        'Banker',
-        'Businessman',
-      ];
+      subOptions = professions; // Use the professions list
     } else if (filterCategory == 'Blood Group') {
-      subOptions = [
-        'All', // Always first
-        'AB+',
-        'O+',
-        'A+',
-        'B+',
-      ];
+      subOptions = bloodGroup; // Use the professions list
     }
 
     // Show a dialog with sub-options based on the selected category
@@ -492,26 +466,23 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Select $filterCategory'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: subOptions.map((String option) {
-              return ListTile(
-                title: Text(option),
-                onTap: () {
-                  setState(() {
-                    if (option == 'All') {
-                      // Handle "All" option to show all users
-                      selectedFilter = null; // Reset the filter
-                      _filterUsers(''); // Pass an empty string to show all users
-                    } else {
-                      selectedFilter = option; // Set the selected filter
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: subOptions.map((Map<String, String> option) {
+                return ListTile(
+                  title: Text(option['CAT_DESC'] ?? option['PROF_DESC'] ?? option['BLOOD_DESC'] ?? ''),
+                  onTap: () {
+                    setState(() {
+                      selectedFilter = option['CAT_CODE'] ?? option['PROF_CODE'] ?? option['BLOOD_CODE']; // Set the selected filter using code
+                      this.filterCategory = filterCategory; // Track the current filter category
                       _filterUsers(_searchController.text); // Apply the filter
-                    }
-                  });
-                  Navigator.pop(context); // Close the sub-filter dialog
-                },
-              );
-            }).toList(),
+                    });
+                    Navigator.pop(context); // Close the sub-filter dialog
+                  },
+                );
+              }).toList(),
+            ),
           ),
         );
       },

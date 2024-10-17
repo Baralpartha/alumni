@@ -491,7 +491,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       // User Information Fields
                       _buildTextField(_nameController, 'Name', username),
                       _buildTextField(_mobileController, 'Phone number', savedPhone),
+                      _buildTextField(_officeNameController, 'Office ', officeName),
+
                       _buildTextField(_designationController, 'Designation', designation),
+                      _buildTextField(_offAddrController, 'Office Address', officeAddress),
 
                       _buildDropdownProf('Profession', selectedProfession, professions, (value) {
                         setState(() {
@@ -499,13 +502,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           print("---------------------------Selected Profession: $selectedProfession");
                         });
                       }),
+
+
                       _buildTextField(_collrollnameController, 'Roll Number', usercollrollname),
-                      _buildDropdownCat('Group', selectedCategory, catCodes, (value) {
-                        setState(() {
-                          selectedCategory = value;
-                          print("---------------------------Selected Category: $selectedCategory");
-                        });
-                      }),
+
                       _buildTextField(_dobController, 'Date Of Birth',dob),
                       _buildTextField(_domController, 'Date Of Marriage',dom),
 
@@ -669,10 +669,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               child: SingleChildScrollView(
                                 child: Column(
                                   children: [
-                                    _buildTextField(_officeNameController, 'Office Name', officeName),
-                                    _buildTextField(_offAddrController, 'Office Address', officeAddress),
-                                    _buildTextField(_offPhoneController, 'Office Phone', officePhone),
-                                    _buildTextField(_offEmailController, 'Office Email', officeEmail),
+
+                                    _buildTextField(_offPhoneController, ' Phone', officePhone),
+                                    _buildTextField(_offEmailController, 'Email' , officeEmail),
                                   ],
                                 ),
                               ),
@@ -835,5 +834,4 @@ Widget _buildDropdownCat(String hint, String? selectedValue, Map<String, String>
     ),
   );
 }
-
 

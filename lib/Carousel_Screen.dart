@@ -16,7 +16,7 @@ class _CarouselScreenState extends State<CarouselScreen> {
   void initState() {
     super.initState();
     // Automatically navigate to LoginScreen after 7 seconds
-    Future.delayed(Duration(seconds: 7), () {
+    Future.delayed(Duration(seconds: 5), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -35,7 +35,7 @@ class _CarouselScreenState extends State<CarouselScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Alapon-NDC90', style: TextStyle(color: Colors.black)),
+
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -54,7 +54,7 @@ class _CarouselScreenState extends State<CarouselScreen> {
             options: CarouselOptions(
               height: carouselHeight, // Use responsive height here
               autoPlay: true,
-              autoPlayInterval: Duration(seconds: 5),
+              autoPlayInterval: Duration(seconds: 6),
               enlargeCenterPage: true,
               viewportFraction: 0.9,
               aspectRatio: 16 / 9,

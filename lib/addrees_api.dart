@@ -1,23 +1,19 @@
-import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-List<Map<String, String>> divisions = [];
-
-Future<void> fetchDivisions() async {
+// Function to fetch division data
+Future<List<Map<String, String>>> fetchDivisions() async {
   final response = await http.get(Uri.parse('http://103.106.118.10/ndc90_api/div.php'));
 
   if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    if (data['status'] == 1) {
-      // Map the division data to the format you need
-      divisions = List<Map<String, String>>.from(data['data'].map((division) {
-        return {
-          'DIV_CODE': division['DIV_CODE'],
-          'DIV_DESC': division['DIV_DESC'],
-        };
-      }));
+    final jsonResponse = json.decode(response.body);
+    if (jsonResponse['status'] == 1) {
+      // Return the division data as a list of maps
+      return List<Map<String, String>>.from(jsonResponse['data']);
+    } else {
+      throw Exception('Failed to load division data');
     }
   } else {
-    throw Exception('Failed to load divisions');
+    throw Exception('Failed to connect to the server');
   }
 }

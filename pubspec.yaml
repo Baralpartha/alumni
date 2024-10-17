@@ -36,7 +36,6 @@ flutter:
   assets:
     - assets/images/sliderb.jpg
     - assets/images/slider1.png
-    - assets/images/slidera.jpg
     - assets/images/ndccc.png
     - assets/images/logooo.png
     - assets/images/sliderc.jpg

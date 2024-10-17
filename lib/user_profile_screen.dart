@@ -31,7 +31,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
 
     // Get division description and update it in the state
     setState(() {
-      divisionDesc = getDivisionDesc(_user.preDiv ?? ""); // Handle null safely
+      // Handle null safely
     });
   }
 
@@ -49,14 +49,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
 
   // Function to get the group description based on the code
   // Function to get the category description based on the code
-  String getCategoryDesc(String catCode) {
-    // Find the category in the map using the code
-    final category = catCodes.keys.firstWhere(
-          (key) => catCodes[key] == catCode,
-      orElse: () => 'Unknown', // Default value if code is not found
-    );
-    return category;
-  }
+  
 
   // Function to decode Base64 string
   Uint8List? decodeBase64(String? base64String) {
@@ -71,13 +64,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
     }
   }
 
-  String getDivisionDesc(String divCode) {
-    final division = divisions.firstWhere(
-          (element) => element['DIV_CODE'] == divCode,
-      orElse: () => {'DIV_DESC': 'Unknown'}, // Default value if not found
-    );
-    return division['DIV_DESC']!;
-  }
+
 
 
   @override
@@ -142,14 +129,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
                         _buildReadOnlyTextField('Designation', _user.designation!),
                       if (_user.officeName != null && _user.officeName!.isNotEmpty)
                         _buildReadOnlyTextField('Office', _user.officeName!),
+                      if (_user.offAddr != null && _user.offAddr!.isNotEmpty)
+                        _buildReadOnlyTextField('Office Address', _user.offAddr!),
                       if (_user.preEmail != null && _user.preEmail!.isNotEmpty)
                         _buildReadOnlyTextField('Email', _user.preEmail!),
                       if (_user.collRollNo != null && _user.collRollNo!.isNotEmpty)
                         _buildReadOnlyTextField('Roll Number', _user.collRollNo!),
                       if (_user.profCode != null && _user.profCode!.isNotEmpty)
                         _buildReadOnlyTextField('Profession', getProfessionDesc(_user.profCode!)),
-                      if (_user.catCode != null && _user.catCode!.isNotEmpty)
-                        _buildReadOnlyTextField('Group', getCategoryDesc(_user.catCode!)),
+
 
 
                       const SizedBox(height: 20),
@@ -165,7 +153,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
                         unselectedLabelColor: Colors.black, // Text color for inactive tabs
                         tabs: [
                           _buildTab('Present\nAddress'),
-                          _buildTab('Permanent\nAddress'),
+                          _buildTab('Per\nAddress'),
                           _buildTab('Office\nAddress'),
                           _buildTab('Family\nInfo'),  // Added new tab for Family Info
                         ],
@@ -232,6 +220,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
         readOnly: true,
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: const TextStyle(color: Color(0xFFC0392B)),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
           ),
@@ -331,7 +320,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (offAddr != null && offAddr.isNotEmpty) _buildReadOnlyTextField('Office Address', offAddr),
           if (phone != null && phone.isNotEmpty) _buildReadOnlyTextField('Phone', phone),
           if (email != null && email.isNotEmpty) _buildReadOnlyTextField('Email', email),
         ],
@@ -356,7 +344,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
     return base64.replaceAll('data:image/png;base64,', '').replaceAll(' ', '+');
   }
 }
-
 
 
 
