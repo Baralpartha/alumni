@@ -42,6 +42,7 @@ class User {
   final String? prePostCode;
   final String? perDiv;
   final String? memType;
+  final String? bloodGroupCode;
 
   User({
     required this.memId,
@@ -76,6 +77,7 @@ class User {
     this.prePostCode,
     this.perDiv,
     this.memType,
+    this.bloodGroupCode,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -112,6 +114,7 @@ class User {
       prePostCode: json['PRE_POST_CODE'],
       perDiv: json['PER_DIV'],
       memType: json['MEM_TYPE'],
+      bloodGroupCode: json['BG'],
     );
   }
 }
@@ -131,6 +134,10 @@ class _HomeScreenState extends State<HomeScreen> {
   List<User> filteredUserList = [];
   int _currentIndex = 1;
   bool _isLoading = true;
+
+  List<String> selectedGroupFilters = [];
+  List<String> selectedProfessionFilters = [];
+  List<String> selectedBloodGroupFilters = [];
 
   // Store the logged-in user info
   User? loggedInUser;
@@ -176,19 +183,24 @@ class _HomeScreenState extends State<HomeScreen> {
   void _filterUsers(String query) {
     setState(() {
       filteredUserList = userList.where((user) {
-        final matchesQuery = user.memName.toLowerCase().contains(query.toLowerCase()) ||
-            user.memMobileNo.contains(query);
-        final matchesFilter = selectedFilter == null || selectedFilter == 'All'
-            ? true // Show all if 'All' is selected
-            : (filterCategory == 'Group'
-            ? user.catCode == selectedFilter // Match with user.catCode if filter is Group
-            : filterCategory == 'Profession'
-            ? user.profCode == selectedFilter // Match with user.profCode if filter is Profession
-            : false); // Default case
-        return matchesQuery && matchesFilter;
+        // Ensure that the profCode is 4 digits by padding with leading zeros, handling null values safely
+        final formattedProfCode = (user.profCode ?? '').padLeft(4, '0');
+
+        final matchesQuery = (user.memName?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
+            (user.memMobileNo?.contains(query) ?? false);
+
+        // Check if the user matches any selected filters, handling null values safely
+        final matchesGroupFilter = selectedGroupFilters.isEmpty || selectedGroupFilters.contains(user.catCode);
+        final matchesProfessionFilter = selectedProfessionFilters.isEmpty || selectedProfessionFilters.contains(formattedProfCode);
+        final matchesBloodGroupFilter = selectedBloodGroupFilters.isEmpty || selectedBloodGroupFilters.contains(user.bloodGroupCode);
+
+        return matchesQuery && matchesGroupFilter && matchesProfessionFilter && matchesBloodGroupFilter;
       }).toList();
     });
   }
+
+
+
 
 
 
@@ -278,6 +290,18 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+
+  // Helper method to get profession description based on code
+  String getProfessionDescription(String code) {
+    for (var profession in professions) {
+      if (profession['PROF_CODE'] == code) {
+        return profession['PROF_DESC'] ?? ''; // Return empty string if description is null
+      }
+    }
+    return ''; // Return empty string if profession is not found
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -293,20 +317,38 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           centerTitle: true,
           backgroundColor: Colors.greenAccent,
-
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(
               bottom: Radius.circular(20), // Adjust the radius as needed
             ),
           ),
         ),
-
         body: Padding(
           padding: const EdgeInsets.all(20.0),
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : Column(
             children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Total Member: ', // Label for the user count
+                    style: TextStyle(
+                      fontSize: 16, // Adjust font size as needed
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    filteredUserList.length.toString(), // Display user count
+                    style: const TextStyle(
+                      fontSize: 16, // Adjust font size as needed
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Expanded(
@@ -344,12 +386,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 8.0),
                       child: ListTile(
-                        leading: user.memPhoto != null &&
-                            user.memPhoto!.isNotEmpty
+                        leading: user.memPhoto != null && user.memPhoto!.isNotEmpty
                             ? _buildUserAvatar(user.memPhoto!)
                             : const CircleAvatar(child: Icon(Icons.person)),
                         title: Text(user.memName),
-                        subtitle: Text(user.memMobileNo),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(user.memMobileNo),
+                            Text(getProfessionDescription(user.profCode ?? '')), // Provide a default (empty string) if profCode is null
+                          ],
+                        ),
                         trailing: IconButton(
                           icon: const Icon(Icons.call),
                           onPressed: () async {
@@ -365,8 +412,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  UserProfileScreen(user: user),
+                              builder: (context) => UserProfileScreen(user: user),
                             ),
                           );
                         },
@@ -374,15 +420,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                 ),
-              ),
+              )
+
+
             ],
           ),
         ),
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _currentIndex,
           items: const [
-            BottomNavigationBarItem(
-                icon: Icon(Icons.photo_album), label: 'Gallery'),
+            BottomNavigationBarItem(icon: Icon(Icons.photo_album), label: 'Gallery'),
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ],
@@ -394,8 +441,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          EditProfileScreen(user: loggedInUser!),
+                      builder: (context) => EditProfileScreen(user: loggedInUser!),
                     ),
                   );
                 } else {
@@ -409,6 +455,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+
   void _showFilterOptions(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -420,26 +467,54 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               ListTile(
                 title: const Text('Group'),
-                trailing: const Icon(Icons.arrow_drop_down), // Add a right-aligned dropdown icon
+                trailing: const Icon(Icons.arrow_drop_down),
                 onTap: () {
-                  Navigator.pop(context); // Close the bottom sheet
-                  _showSubFilterOptions(context, 'Group');
+                  Navigator.pop(context);
+                  _showSubFilterOptions(context, 'Group', selectedGroupFilters, (newSelection) {
+                    setState(() {
+                      selectedGroupFilters = newSelection;
+                      _filterUsers(_searchController.text);
+                    });
+                  });
                 },
               ),
               ListTile(
                 title: const Text('Profession'),
-                trailing: const Icon(Icons.arrow_drop_down), // Add a right-aligned dropdown icon
+                trailing: const Icon(Icons.arrow_drop_down),
                 onTap: () {
-                  Navigator.pop(context); // Close the bottom sheet
-                  _showSubFilterOptions(context, 'Profession');
+                  Navigator.pop(context);
+                  _showSubFilterOptions(context, 'Profession', selectedProfessionFilters, (newSelection) {
+                    setState(() {
+                      selectedProfessionFilters = newSelection;
+                      _filterUsers(_searchController.text);
+                    });
+                  });
                 },
               ),
               ListTile(
                 title: const Text('Blood Group'),
-                trailing: const Icon(Icons.arrow_drop_down), // Add a right-aligned dropdown icon
+                trailing: const Icon(Icons.arrow_drop_down),
                 onTap: () {
-                  Navigator.pop(context); // Close the bottom sheet
-                  _showSubFilterOptions(context, 'Blood Group');
+                  Navigator.pop(context);
+                  _showSubFilterOptions(context, 'Blood Group', selectedBloodGroupFilters, (newSelection) {
+                    setState(() {
+                      selectedBloodGroupFilters = newSelection;
+                      _filterUsers(_searchController.text);
+                    });
+                  });
+                },
+              ),
+              ListTile(
+                title: const Text('Clear Filters'),
+                trailing: const Icon(Icons.clear),
+                onTap: () {
+                  Navigator.pop(context);
+                  setState(() {
+                    selectedGroupFilters.clear();
+                    selectedProfessionFilters.clear();
+                    selectedBloodGroupFilters.clear();
+                    _filterUsers(_searchController.text); // Reset the filter
+                  });
                 },
               ),
             ],
@@ -449,46 +524,74 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  String? filterCategory; // Declare filterCategory at the class level
 
-  void _showSubFilterOptions(BuildContext context, String filterCategory) {
+  //String? filterCategory; // Declare filterCategory at the class level
+
+  void _showSubFilterOptions(BuildContext context, String filterCategory, List<String> selectedFilters, Function(List<String>) onSelectedFiltersChanged) {
     List<Map<String, String>> subOptions = [];
 
-    // Define sub-options based on the category selected
     if (filterCategory == 'Group') {
-      subOptions = group; // Use the group list
+      subOptions = group;
     } else if (filterCategory == 'Profession') {
-      subOptions = professions; // Use the professions list
+      subOptions = professions;
     } else if (filterCategory == 'Blood Group') {
-      subOptions = bloodGroup; // Use the professions list
+      subOptions = bloodGroup;
     }
 
-    // Show a dialog with sub-options based on the selected category
+    // Temporary list for selected filters, initialized with the current selections
+    List<String> tempSelectedFilters = List.from(selectedFilters);
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Select $filterCategory'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: subOptions.map((Map<String, String> option) {
-                return ListTile(
-                  title: Text(option['CAT_DESC'] ?? option['PROF_DESC'] ?? option['BLOOD_DESC'] ?? ''),
-                  onTap: () {
-                    setState(() {
-                      selectedFilter = option['CAT_CODE'] ?? option['PROF_CODE'] ?? option['BLOOD_CODE']; // Set the selected filter using code
-                      this.filterCategory = filterCategory; // Track the current filter category
-                      _filterUsers(_searchController.text); // Apply the filter
-                    });
-                    Navigator.pop(context); // Close the sub-filter dialog
+        return StatefulBuilder( // Use StatefulBuilder to manage state within the dialog
+          builder: (BuildContext context, StateSetter setDialogState) {
+            return AlertDialog(
+              title: Text('Select $filterCategory'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: subOptions.map((Map<String, String> option) {
+                    String optionCode = option['CAT_CODE'] ?? option['PROF_CODE'] ?? option['BLOOD_CODE']!;
+                    bool isSelected = tempSelectedFilters.contains(optionCode);
+
+                    return CheckboxListTile(
+                      title: Text(option['CAT_DESC'] ?? option['PROF_DESC'] ?? option['BLOOD_DESC'] ?? ''),
+                      value: isSelected,
+                      onChanged: (bool? value) {
+                        setDialogState(() {
+                          if (value == true) {
+                            tempSelectedFilters.add(optionCode);
+                          } else {
+                            tempSelectedFilters.remove(optionCode);
+                          }
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  child: const Text('OK'),
+                  onPressed: () {
+                    // When OK is clicked, pass the selected filters back to the parent
+                    onSelectedFiltersChanged(tempSelectedFilters);
+                    Navigator.pop(context);
                   },
-                );
-              }).toList(),
-            ),
-          ),
+                ),
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
+          },
         );
       },
     );
   }
+
 }

@@ -16,7 +16,7 @@ class _CarouselScreenState extends State<CarouselScreen> {
   void initState() {
     super.initState();
     // Automatically navigate to LoginScreen after 7 seconds
-    Future.delayed(Duration(seconds: 5), () {
+    Future.delayed(Duration(seconds: 7), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -54,7 +54,7 @@ class _CarouselScreenState extends State<CarouselScreen> {
             options: CarouselOptions(
               height: carouselHeight, // Use responsive height here
               autoPlay: true,
-              autoPlayInterval: Duration(seconds: 6),
+              autoPlayInterval: Duration(seconds:3),
               enlargeCenterPage: true,
               viewportFraction: 0.9,
               aspectRatio: 16 / 9,

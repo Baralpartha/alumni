@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     // ৩ সেকেন্ড পর কারোসেল স্ক্রিনে যাবে
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 2), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const CarouselScreen()),

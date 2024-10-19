@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:alumni/profession_list.dart';
+import 'package:alumni/userDataRefreshFunction.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -40,13 +41,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _catCodeController; // For category code
   late TextEditingController _collSecController; // For college section
   late TextEditingController _yrOfPassController; // For year of passing
-  late TextEditingController _preDivController; // For present division
-  late TextEditingController _preDistController; // For present district
-  late TextEditingController _preThanaController; // For present thana
-  late TextEditingController _perDivController; // For permanent division
-  late TextEditingController _perDistController; // For permanent district
-  late TextEditingController _perThanaController; // For permanent thana
-  late TextEditingController _profCodeController; // For professional code
   late TextEditingController _domController; // For date of membership
   late TextEditingController _prePostCodeController; // For present post code
   late TextEditingController _memTypeController;
@@ -96,7 +90,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 // Added for designation
 
   String? selectedProfession;
-  String? selectedCategory;
+  String? selectedGroup;
+  //String? selectedCategory;
+
+  String? phone;
+  String? password;
+
+  String? memPhotoBase64;
 
 
   File? _pickedImage; // To store the picked image
@@ -129,13 +129,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _catCodeController = TextEditingController(text: widget.user.catCode ?? '');
     _collSecController = TextEditingController(text: widget.user.collSec ?? '');
     _yrOfPassController = TextEditingController(text: widget.user.yrOfPass ?? '');
-    _preDivController = TextEditingController(text: widget.user.preDiv ?? '');
-    _preDistController = TextEditingController(text: widget.user.preDist ?? '');
-    _preThanaController = TextEditingController(text: widget.user.preThana ?? '');
-    _perDivController = TextEditingController(text: widget.user.perDiv ?? '');
-    _perDistController = TextEditingController(text: widget.user.perDist ?? '');
-    _perThanaController = TextEditingController(text: widget.user.perThana ?? '');
-    _profCodeController = TextEditingController(text: widget.user.profCode ?? '');
     _domController = TextEditingController(text: widget.user.dom ?? '');
     _prePostCodeController = TextEditingController(text: widget.user.prePostCode ?? '');
     _memTypeController = TextEditingController(text: widget.user.memType ?? '');
@@ -152,7 +145,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       savedPassword = prefs.getString('password') ?? '';
       username = prefs.getString("username") ?? '';
       usercollrollname = prefs.getString("usercollrollname") ?? '';
-      usermemphoto = prefs.getString("memPhoto") ?? '';
+      usermemphoto = prefs.getString("memphoto") ?? '';
       fathername = prefs.getString("fathername") ?? '';
       mothername = prefs.getString("mothername") ?? '';
       presentAddress = prefs.getString("presentaddress") ?? '';
@@ -183,8 +176,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       prePostCode = prefs.getString("pre_post_code") ?? ''; // Added for present post code
       memType = prefs.getString("membertype") ?? ''; // Added for member type
 
-      selectedProfession = profCode; // Set selectedProfession to profCode
-      selectedCategory=catCode;//set selectedProfession to catcode
+      selectedProfession = (profCode ?? '').padLeft(4, '0'); // Set selectedProfession to profCode
+      selectedGroup = catCode;
     });
 
     print('---------------------$usermemphoto-----------------------');
@@ -217,17 +210,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
 
     // Convert image to Base64 string if an image is picked
-    String? memPhotoBase64;
     if (_pickedImage != null) {
       final bytes = await _pickedImage!.readAsBytes();
-      memPhotoBase64 = base64Encode(bytes);
+      setState(() {
+        memPhotoBase64 = base64Encode(bytes);
+      });
     }
 
     // Construct the updated user data
     final updatedUserData = {
       'mem_id': memId,
       'action': "update",
-      'mem_photo': memPhotoBase64 ?? '', // Ensure empty string if no new image
+      'mem_photo': 'No $memPhotoBase64', // Ensure empty string if no new image
       'mem_name': _nameController.text,
       'mem_mobile_no': _mobileController.text,
       'f_name': _fNameController.text,
@@ -245,7 +239,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       'dob': _dobController.text,
       'designation': _designationController.text,
       // Additional fields
-      'cat_code': selectedCategory,
+      'cat_code': selectedGroup,
       'coll_sec': _collSecController.text,
       'yr_of_pass': _yrOfPassController.text,
       'pre_div': selectedPreDivision,
@@ -278,8 +272,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         // Update local state with the new data
 
         print('----------------Professional Code $selectedProfession ---------------------');
+        print('----------------Image Code New $memPhotoBase64 ---------------------');
+        print('----------------Image Code New $memPhotoBase64 ---------------------');
+        print('----------------Image Code New $memPhotoBase64 ---------------------');
+        print('----------------Image Code New $memPhotoBase64 ---------------------');
+        print('----------------Image Code New $memPhotoBase64 ---------------------');
         // Optionally, you can navigate back or refresh the user data
-        Navigator.pop(context, true); // Go back to the previous screen
+        //Navigator.pop(context, true); // Go back to the previous screen
+        UserLogin.loginUser(context, savedPhone!, savedPassword!);
       } else {
         // Handle error
         ScaffoldMessenger.of(context).showSnackBar(
@@ -446,269 +446,297 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 4, // Increased number of tabs to 4
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            "Edit Profile",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                HomeScreen(
+                  user: {
+                    'name': username!,
+                    'memId': memId!,
+                    'phone': savedPhone!,
+                    'collRollNo': usercollrollname!,
+                  },
+                ),
+          ),
+        );
+        return false;
+      },
+      child: DefaultTabController(
+        length: 4, // Increased number of tabs to 4
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(
+              "Edit Profile",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor: Colors.greenAccent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(20),
+              ),
             ),
           ),
-          centerTitle: true,
-          backgroundColor: Colors.greenAccent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(
-              bottom: Radius.circular(20),
-            ),
-          ),
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      // User Profile Photo with image picker
-                      GestureDetector(
-                        onTap: _pickImage,  // Function to pick image
-                        child: CircleAvatar(
-                          radius: 50,
-                          backgroundImage: _pickedImage != null
-                              ? FileImage(_pickedImage!) // Show picked image
-                              : (usermemphoto != null && usermemphoto!.isNotEmpty
-                              ? MemoryImage(decodeBase64(fixBase64(usermemphoto!)) ?? Uint8List(0)) // Show memory image
-                              : const AssetImage('assets/default_profile.png')) as ImageProvider, // Show default image if none selected
+          body: Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        // User Profile Photo with image picker
+                        GestureDetector(
+                          onTap: _pickImage,  // Function to pick image
+                          child: CircleAvatar(
+                            radius: 50,
+                            backgroundImage: _pickedImage != null
+                                ? FileImage(_pickedImage!) // Show picked image
+                                : (usermemphoto != null && usermemphoto!.isNotEmpty
+                                ? MemoryImage(decodeBase64(fixBase64(usermemphoto!)) ?? Uint8List(0)) // Show memory image
+                                : const AssetImage('assets/default_profile.png')) as ImageProvider, // Show default image if none selected
+                          ),
                         ),
-                      ),
 
-                      const SizedBox(height: 20),
+                        const SizedBox(height: 20),
 
-                      // User Information Fields
-                      _buildTextField(_nameController, 'Name', username),
-                      _buildTextField(_mobileController, 'Phone number', savedPhone),
-                      _buildTextField(_officeNameController, 'Office ', officeName),
-
-                      _buildTextField(_designationController, 'Designation', designation),
-                      _buildTextField(_offAddrController, 'Office Address', officeAddress),
-
-                      _buildDropdownProf('Profession', selectedProfession, professions, (value) {
-                        setState(() {
-                          selectedProfession = value;
-                          print("---------------------------Selected Profession: $selectedProfession");
-                        });
-                      }),
+                        // User Information Fields
+                        _buildTextField(_nameController, 'Name', username),
+                        _buildTextField(_mobileController, 'Phone number', savedPhone),
+                        _buildDropdownProf('Profession', selectedProfession, professions, (value) {
+                          setState(() {
+                            selectedProfession = value;
+                            print("---------------------------Selected Profession: $selectedProfession");
+                          });
+                        }),
+                        _buildTextField(_designationController, 'Designation', designation),
+                        _buildTextField(_officeNameController, 'Office ', officeName),
 
 
-                      _buildTextField(_collrollnameController, 'Roll Number', usercollrollname),
+                        _buildTextField(_offAddrController, 'Office Address', officeAddress),
 
-                      _buildTextField(_dobController, 'Date Of Birth',dob),
-                      _buildTextField(_domController, 'Date Of Marriage',dom),
+                        _buildDropdownProf('Group', selectedGroup, group, (value) {
+                          setState(() {
+                            selectedGroup = value;
+                            print("---------------------------Selected Profession: $selectedGroup");
+                          });
+                        }),
 
-                      const SizedBox(height: 10),
 
-                      // Tab Bar with the new "Family Info" tab
-                      TabBar(
-                        tabs: [
-                          Tab(
-                            child: Container(
-                              height: 60.0,
-                              decoration: BoxDecoration(
-                                color: Color(0xFFC0392B),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text("Present", style: TextStyle(color: Colors.white)),
-                                    Text("Address", style: TextStyle(color: Colors.white)),
-                                  ],
+
+
+                        _buildTextField(_collrollnameController, 'Roll Number', usercollrollname),
+
+                        _buildTextField(_dobController, 'Date Of Birth',dob),
+                        _buildTextField(_domController, 'Date Of Marriage',dom),
+
+                        const SizedBox(height: 10),
+
+                        // Tab Bar with the new "Family Info" tab
+                        TabBar(
+                          tabs: [
+                            Tab(
+                              child: Container(
+                                height: 60.0,
+                                decoration: BoxDecoration(
+                                  color: Color(0xFFC0392B),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text("Present", style: TextStyle(color: Colors.white)),
+                                      Text("Address", style: TextStyle(color: Colors.white)),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          Tab(
-                            child: Container(
-                              height: 60.0,
-                              decoration: BoxDecoration(
-                                color: Color(0xFFC0392B),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text("Permanent", style: TextStyle(color: Colors.white)),
-                                    Text("Address", style: TextStyle(color: Colors.white)),
-                                  ],
+                            Tab(
+                              child: Container(
+                                height: 60.0,
+                                decoration: BoxDecoration(
+                                  color: Color(0xFFC0392B),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text("Permanent", style: TextStyle(color: Colors.white)),
+                                      Text("Address", style: TextStyle(color: Colors.white)),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          Tab(
-                            child: Container(
-                              height: 60.0,
-                              decoration: BoxDecoration(
-                                color: Color(0xFFC0392B),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text("Office", style: TextStyle(color: Colors.white)),
-                                    Text("Address", style: TextStyle(color: Colors.white)),
-                                  ],
+                            Tab(
+                              child: Container(
+                                height: 60.0,
+                                decoration: BoxDecoration(
+                                  color: Color(0xFFC0392B),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text("Office", style: TextStyle(color: Colors.white)),
+                                      Text("Address", style: TextStyle(color: Colors.white)),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          Tab(
-                            child: Container(
-                              height: 60.0,
-                              decoration: BoxDecoration(
-                                color: Color(0xFFC0392B),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text("Family", style: TextStyle(color: Colors.white)),
-                                    Text("Info", style: TextStyle(color: Colors.white)),
-                                  ],
+                            Tab(
+                              child: Container(
+                                height: 60.0,
+                                decoration: BoxDecoration(
+                                  color: Color(0xFFC0392B),
+                                  borderRadius: BorderRadius.circular(8.0),
                                 ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Tab view for addresses and family info
-                      SizedBox(
-                        height: 400, // Adjust height as needed
-                        child: TabBarView(
-                          children: [
-                            // Present Address Tab
-                            Container(
-                              padding: const EdgeInsets.all(16.0),
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  children: [
-                                    _buildTextField(_preAddrController, ' Address', presentAddress),
-                                    _buildTextField(_prePhoneController, ' Phone', presentPhone),
-                                    _buildTextField(_preEmailController, 'Email', presentEmail),
-                                    _buildDropdown(' Division', selectedPreDivision, divisions, (value) {
-                                      setState(() {
-                                        selectedPreDivision = value;
-                                        fetchDistricts(value!, true); // Fetch districts for present address
-                                      });
-                                    }),
-                                    _buildDropdown('District', selectedPreDistrict, preDistricts, (value) {
-                                      setState(() {
-                                        selectedPreDistrict = value;
-                                        fetchThanas(value!, true); // Fetch thanas for present address
-                                      });
-                                    }),
-                                    _buildDropdown(' Thana', selectedPreThana, preThanas, (value) {
-                                      setState(() {
-                                        selectedPreThana = value;
-                                      });
-                                    }),
-                                    _buildTextField(_prePostCodeController, ' Post Code', prePostCode),
-                                  ],
-                                ),
-                              ),
-                            ),
-
-                            // Permanent Address Tab
-                            Container(
-                              padding: const EdgeInsets.all(16.0),
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  children: [
-                                    _buildTextField(_perAddrController, ' Address', permanentAddress),
-                                    _buildTextField(_perPhoneController, ' Phone', permanentPhone),
-                                    _buildTextField(_perEmailController, ' Email', permanentEmail),
-                                    _buildDropdown(' Division', selectedPerDivision, divisions, (value) {
-                                      setState(() {
-                                        selectedPerDivision = value;
-                                        fetchDistricts(value!, false); // Fetch districts for permanent address
-                                      });
-                                    }),
-                                    _buildDropdown(' District', selectedPerDistrict, perDistricts, (value) {
-                                      setState(() {
-                                        selectedPerDistrict = value;
-                                        fetchThanas(value!, false); // Fetch thanas for permanent address
-                                      });
-                                    }),
-                                    _buildDropdown('Permanent Thana', selectedPerThana, perThanas, (value) {
-                                      setState(() {
-                                        selectedPerThana = value;
-                                      });
-                                    }),
-                                  ],
-                                ),
-                              ),
-                            ),
-
-                            // Office Address Tab
-                            Container(
-                              padding: const EdgeInsets.all(16.0),
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  children: [
-
-                                    _buildTextField(_offPhoneController, ' Phone', officePhone),
-                                    _buildTextField(_offEmailController, 'Email' , officeEmail),
-                                  ],
-                                ),
-                              ),
-                            ),
-
-                            // Family Info Tab
-                            Container(
-                              padding: const EdgeInsets.all(16.0),
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  children: [
-                                    _buildTextField(_fNameController, 'Father\'s Name', fathername),
-                                    _buildTextField(_mNameController, 'Mother\'s Name', mothername),
-                                  ],
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text("Family", style: TextStyle(color: Colors.white)),
+                                      Text("Info", style: TextStyle(color: Colors.white)),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
+
+                        const SizedBox(height: 20),
+
+                        // Tab view for addresses and family info
+                        SizedBox(
+                          height: 400, // Adjust height as needed
+                          child: TabBarView(
+                            children: [
+                              // Present Address Tab
+                              Container(
+                                padding: const EdgeInsets.all(16.0),
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      _buildTextField(_preAddrController, ' Address', presentAddress),
+                                      _buildTextField(_prePhoneController, ' Phone', presentPhone),
+                                      _buildTextField(_preEmailController, 'Email', presentEmail),
+                                      _buildDropdown(' Division', selectedPreDivision, divisions, (value) {
+                                        setState(() {
+                                          selectedPreDivision = value;
+                                          fetchDistricts(value!, true); // Fetch districts for present address
+                                        });
+                                      }),
+                                      _buildDropdown('District', selectedPreDistrict, preDistricts, (value) {
+                                        setState(() {
+                                          selectedPreDistrict = value;
+                                          fetchThanas(value!, true); // Fetch thanas for present address
+                                        });
+                                      }),
+                                      _buildDropdown(' Thana', selectedPreThana, preThanas, (value) {
+                                        setState(() {
+                                          selectedPreThana = value;
+                                        });
+                                      }),
+                                      _buildTextField(_prePostCodeController, ' Post Code', prePostCode),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              // Permanent Address Tab
+                              Container(
+                                padding: const EdgeInsets.all(16.0),
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      _buildTextField(_perAddrController, ' Address', permanentAddress),
+                                      _buildTextField(_perPhoneController, ' Phone', permanentPhone),
+                                      _buildTextField(_perEmailController, ' Email', permanentEmail),
+                                      _buildDropdown(' Division', selectedPerDivision, divisions, (value) {
+                                        setState(() {
+                                          selectedPerDivision = value;
+                                          fetchDistricts(value!, false); // Fetch districts for permanent address
+                                        });
+                                      }),
+                                      _buildDropdown(' District', selectedPerDistrict, perDistricts, (value) {
+                                        setState(() {
+                                          selectedPerDistrict = value;
+                                          fetchThanas(value!, false); // Fetch thanas for permanent address
+                                        });
+                                      }),
+                                      _buildDropdown('Permanent Thana', selectedPerThana, perThanas, (value) {
+                                        setState(() {
+                                          selectedPerThana = value;
+                                        });
+                                      }),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              // Office Address Tab
+                              Container(
+                                padding: const EdgeInsets.all(16.0),
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+
+                                      _buildTextField(_offPhoneController, ' Phone', officePhone),
+                                      _buildTextField(_offEmailController, 'Email' , officeEmail),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              // Family Info Tab
+                              Container(
+                                padding: const EdgeInsets.all(16.0),
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      _buildTextField(_fNameController, 'Father\'s Name', fathername),
+                                      _buildTextField(_mNameController, 'Mother\'s Name', mothername),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            // Save Button fixed at the bottom
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: _isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                onPressed: _updateUserData,
-                child: const Text('Save Changes'),
+              // Save Button fixed at the bottom
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: _isLoading
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                  onPressed: _updateUserData,
+                  child: const Text('Save Changes'),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -798,8 +826,8 @@ Widget _buildDropdownProf(String label, String? selectedValue, List<dynamic> ite
       ),
       items: items.map<DropdownMenuItem<String>>((item) {
         // Handle nulls safely
-        final value = item['DIV_CODE'] ?? item['DIST_CODE'] ?? item['THANA_CODE'] ?? item['PROF_CODE'];
-        final description = item['DIV_DESC'] ?? item['DIST_DESC'] ?? item['THANA_DESC'] ?? item['PROF_DESC'];
+        final value = item['DIV_CODE'] ?? item['DIST_CODE'] ?? item['THANA_CODE'] ?? item['PROF_CODE'] ?? item['CAT_CODE'];
+        final description = item['DIV_DESC'] ?? item['DIST_DESC'] ?? item['THANA_DESC'] ?? item['PROF_DESC'] ?? item['CAT_DESC'];
 
         return DropdownMenuItem<String>(
           value: value, // This can be null if no code is found
@@ -834,4 +862,3 @@ Widget _buildDropdownCat(String hint, String? selectedValue, Map<String, String>
     ),
   );
 }
-

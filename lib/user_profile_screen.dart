@@ -19,7 +19,14 @@ class UserProfileScreen extends StatefulWidget {
 class _UserProfileScreenState extends State<UserProfileScreen> with SingleTickerProviderStateMixin {
   late User _user;
   late TabController _tabController;
-  String? divisionDesc;
+  final AddressApiService apiService = AddressApiService();
+  String? preDivDesc;
+  String? preDistDesc;
+  String? preThanaDesc;
+  String? perDivDesc;
+  String? perDistDesc;
+  String? perThanaDesc;
+
 
   @override
   void initState() {
@@ -28,10 +35,51 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
 
     // Initialize the TabController with the correct length (4 tabs)
     _tabController = TabController(length: 4, vsync: this); // 4 tabs including Family Info
+    fetchPreAddressDetails();
+    fetchPerAddressDetails();
+  }
 
-    // Get division description and update it in the state
+  // Fetch address details
+  Future<void> fetchPreAddressDetails() async {
+    String divCode = _user.preDiv!; // Example Division Code
+    String distCode = _user.preDist!; // Example District Code
+    String thanaCode = _user.preThana!; // Example Thana Code
+
+    // Fetch Division Description
+    String? fetchedDivDesc = await apiService.getDivisionDescription(divCode);
+
+    // Fetch District Description
+    String? fetchedDistDesc = await apiService.getDistrictDescription(divCode, distCode);
+
+    // Fetch Thana Description
+    String? fetchedThanaDesc = await apiService.getThanaDescription(distCode, thanaCode);
+
     setState(() {
-      // Handle null safely
+      preDivDesc = fetchedDivDesc;
+      preDistDesc = fetchedDistDesc;
+      preThanaDesc = fetchedThanaDesc;
+    });
+  }
+
+  // Fetch address details
+  Future<void> fetchPerAddressDetails() async {
+    String divCode = _user.perDiv!; // Example Division Code
+    String distCode = _user.perDist!; // Example District Code
+    String thanaCode = _user.perThana!; // Example Thana Code
+
+    // Fetch Division Description
+    String? fetchedDivDesc = await apiService.getDivisionDescription(divCode);
+
+    // Fetch District Description
+    String? fetchedDistDesc = await apiService.getDistrictDescription(divCode, distCode);
+
+    // Fetch Thana Description
+    String? fetchedThanaDesc = await apiService.getThanaDescription(distCode, thanaCode);
+
+    setState(() {
+      perDivDesc = fetchedDivDesc;
+      perDistDesc = fetchedDistDesc;
+      perThanaDesc = fetchedThanaDesc;
     });
   }
 
@@ -47,9 +95,24 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
   }
 
 
+
+
+
+  // Function to get the group description based on the code
+  String getGroupDesc(String groupCode) {
+    // Find the group in the list using the code
+    final groupItem = group.firstWhere(
+          (element) => element['CAT_CODE'] == groupCode,
+      orElse: () => {'CAT_DESC': 'Unknown'}, // Default value if code is not found
+    );
+    return groupItem['CAT_DESC']!;
+  }
+
+
+
   // Function to get the group description based on the code
   // Function to get the category description based on the code
-  
+
 
   // Function to decode Base64 string
   Uint8List? decodeBase64(String? base64String) {
@@ -125,18 +188,23 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
                       // Display fields only if they are not null
                       if (_user.memMobileNo != null && _user.memMobileNo!.isNotEmpty)
                         _buildReadOnlyTextField('Mobile Number', _user.memMobileNo!),
+                      if (_user.profCode != null && _user.profCode!.isNotEmpty)
+                        _buildReadOnlyTextField('Profession', getProfessionDesc((_user.profCode ?? '').padLeft(4, '0'))),
                       if (_user.designation != null && _user.designation!.isNotEmpty)
                         _buildReadOnlyTextField('Designation', _user.designation!),
+
                       if (_user.officeName != null && _user.officeName!.isNotEmpty)
                         _buildReadOnlyTextField('Office', _user.officeName!),
-                      if (_user.offAddr != null && _user.offAddr!.isNotEmpty)
-                        _buildReadOnlyTextField('Office Address', _user.offAddr!),
+
                       if (_user.preEmail != null && _user.preEmail!.isNotEmpty)
                         _buildReadOnlyTextField('Email', _user.preEmail!),
                       if (_user.collRollNo != null && _user.collRollNo!.isNotEmpty)
                         _buildReadOnlyTextField('Roll Number', _user.collRollNo!),
-                      if (_user.profCode != null && _user.profCode!.isNotEmpty)
-                        _buildReadOnlyTextField('Profession', getProfessionDesc(_user.profCode!)),
+                      if (_user.catCode != null && _user.catCode!.isNotEmpty)
+                        _buildReadOnlyTextField('Group', getGroupDesc(_user.catCode ?? '')),
+
+
+
 
 
 
@@ -170,13 +238,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
                             _presentAddressTab(
                               _user.preAddr,
                               _user.prePhone,
-                              divisionDesc, // Pass the division description
-                              _user.preThana,
-                              _user.preDist,
+                              preDivDesc, // Pass the division description
+                              preDistDesc,
+                              preThanaDesc,
                               _user.prePostCode,
                               _user.dom,
                             ),
-                            _permanentAddressTab(_user.perAddr, _user.perPhone, _user.perDiv, _user.perThana, _user.perDist),
+                            _permanentAddressTab(_user.perAddr, _user.perPhone, perDivDesc, perDistDesc, perThanaDesc),
                             _officeAddressTab(_user.offAddr, _user.offPhone, _user.offEmail),
                             _familyInfoTab(_user.fName, _user.mName),  // Added Family Info Tab view
                           ],
@@ -275,7 +343,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
 
 
   // Method to create a tab for Present Address fields
-  Widget _presentAddressTab(String? preAddr, String? prePhone, String? preDiv, String? preThana, String? preDist, String? prePostCode,String? dom) {
+  Widget _presentAddressTab(String? preAddr, String? prePhone, String? preDiv, String? preDist, String? preThana, String? prePostCode,String? dom) {
     print('DOM value: $dom');
 
     return Padding(
@@ -286,8 +354,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
           if (preAddr != null && preAddr!.isNotEmpty) _buildReadOnlyTextField('Present Address', preAddr!),
           if (prePhone != null && prePhone!.isNotEmpty) _buildReadOnlyTextField('Phone', prePhone!),
           if (preDiv != null && preDiv!.isNotEmpty) _buildReadOnlyTextField('Division', preDiv!),
-          if (preThana != null && preThana!.isNotEmpty) _buildReadOnlyTextField('Thana', preThana!),
           if (preDist != null && preDist!.isNotEmpty) _buildReadOnlyTextField('District', preDist!),
+          if (preThana != null && preThana!.isNotEmpty) _buildReadOnlyTextField('Thana', preThana!),
           if (prePostCode != null && prePostCode!.isNotEmpty) _buildReadOnlyTextField('Postcode', prePostCode!),
           if (dom != null && dom!.isNotEmpty) _buildReadOnlyTextField('Date Of Marriage', dom!),
         ],
@@ -297,7 +365,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
   }
 
   // Method to create a tab for Permanent Address fields
-  Widget _permanentAddressTab(String? address, String? phone, String? div, String? thana, String? dist) {
+  Widget _permanentAddressTab(String? address, String? phone, String? div, String? dist, String? thana) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -306,8 +374,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
           if (address != null && address.isNotEmpty) _buildReadOnlyTextField('Address', address),
           if (phone != null && phone.isNotEmpty) _buildReadOnlyTextField('Phone', phone),
           if (div != null && div.isNotEmpty) _buildReadOnlyTextField('Division', div),
-          if (thana != null && thana.isNotEmpty) _buildReadOnlyTextField('Thana', thana),
           if (dist != null && dist.isNotEmpty) _buildReadOnlyTextField('District', dist),
+          if (thana != null && thana.isNotEmpty) _buildReadOnlyTextField('Thana', thana),
         ],
       ),
     );
@@ -320,6 +388,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (_user.offAddr != null && _user.offAddr!.isNotEmpty)
+            _buildReadOnlyTextField('Office ', _user.offAddr!),
           if (phone != null && phone.isNotEmpty) _buildReadOnlyTextField('Phone', phone),
           if (email != null && email.isNotEmpty) _buildReadOnlyTextField('Email', email),
         ],
@@ -344,8 +414,3 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
     return base64.replaceAll('data:image/png;base64,', '').replaceAll(' ', '+');
   }
 }
-
-
-
-
-
