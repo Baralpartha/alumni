@@ -29,8 +29,12 @@ List<Map<String, String>> group = [
 
 
 List<Map<String, String>> bloodGroup = [
-  {'BLOOD_CODE': '01', 'BLOOD_DESC': 'AB+'},
-  {'BLOOD_CODE': '02', 'BLOOD_DESC': 'O+'},
-  {'BLOOD_CODE': '03', 'BLOOD_DESC': 'A+'},
-  {'BLOOD_CODE': '04', 'BLOOD_DESC': 'B+'},
+  {'BLOOD_CODE': '01', 'BLOOD_DESC': 'A+'},
+  {'BLOOD_CODE': '02', 'BLOOD_DESC': 'A-'},
+  {'BLOOD_CODE': '03', 'BLOOD_DESC': 'B+'},
+  {'BLOOD_CODE': '04', 'BLOOD_DESC': 'B-'},
+  {'BLOOD_CODE': '05', 'BLOOD_DESC': 'O-'},
+  {'BLOOD_CODE': '06', 'BLOOD_DESC': 'O+'},
+  {'BLOOD_CODE': '07', 'BLOOD_DESC': 'AB+'},
+  {'BLOOD_CODE': '08', 'BLOOD_DESC': 'AB-'},
 ];

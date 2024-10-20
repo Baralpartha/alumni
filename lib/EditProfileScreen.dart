@@ -45,6 +45,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _prePostCodeController; // For present post code
   late TextEditingController _memTypeController;
   late TextEditingController _collrollnameController ;// For member type
+  late TextEditingController _bloodGroupController; // For blood group
+
+
+
 
   bool _isLoading = false;
 
@@ -91,6 +95,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   String? selectedProfession;
   String? selectedGroup;
+  String? selectedbloodGroup;
   //String? selectedCategory;
 
   String? phone;
@@ -133,6 +138,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _prePostCodeController = TextEditingController(text: widget.user.prePostCode ?? '');
     _memTypeController = TextEditingController(text: widget.user.memType ?? '');
     _collrollnameController = TextEditingController(text: widget.user.collRollNo ?? '');
+    _bloodGroupController = TextEditingController(text: widget.user.bloodGroupCode ?? '');
+
 
   }
 
@@ -176,8 +183,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       prePostCode = prefs.getString("pre_post_code") ?? ''; // Added for present post code
       memType = prefs.getString("membertype") ?? ''; // Added for member type
 
+
       selectedProfession = (profCode ?? '').padLeft(4, '0'); // Set selectedProfession to profCode
       selectedGroup = catCode;
+      selectedbloodGroup =catCode;
     });
 
     print('---------------------$usermemphoto-----------------------');
@@ -253,6 +262,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       'pre_post_code': _prePostCodeController.text,
       'mem_type': _memTypeController.text,
       'collRoll_Num': _collrollnameController.text,
+      'bloodGroup': _bloodGroupController.text,
+
     };
 
     try {
@@ -525,6 +536,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           setState(() {
                             selectedGroup = value;
                             print("---------------------------Selected Profession: $selectedGroup");
+                          });
+                        }),
+                        _buildDropdownProf('Group', selectedGroup, group, (value) {
+                          setState(() {
+                            selectedGroup = value;
+                            print("---------------------------Selected Profession: $selectedGroup");
+                          });
+                        }),
+
+                        _buildDropdownProf('Group', selectedbloodGroup, group, (value) {
+                          setState(() {
+                            selectedbloodGroup = value;
+                            print("---------------------------Selected Profession: $selectedbloodGroup");
                           });
                         }),
 

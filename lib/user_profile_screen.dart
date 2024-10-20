@@ -3,6 +3,7 @@ import 'package:alumni/profession_list.dart';
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
 
+import 'EditProfileScreen.dart';
 import 'Home_screen.dart';
 import 'addrees_api.dart';
 
@@ -17,6 +18,7 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class _UserProfileScreenState extends State<UserProfileScreen> with SingleTickerProviderStateMixin {
+  int _selectedIndex = 0;
   late User _user;
   late TabController _tabController;
   final AddressApiService apiService = AddressApiService();
@@ -27,7 +29,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
   String? perDistDesc;
   String? perThanaDesc;
 
-
+// Declare a loggedInUser variable
+  Map<String, dynamic>? loggedInUser;
   @override
   void initState() {
     super.initState();
@@ -109,6 +112,17 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
   }
 
 
+  // Function to get the blood group description based on the code
+  String getBloodGroupDesc(String bloodCode) {
+    // Find the blood group in the list using the code
+    final bloodGroupItem = bloodGroup.firstWhere(
+          (element) => element['BLOOD_CODE'] == bloodCode,
+      orElse: () => {'BLOOD_DESC': 'Unknown'}, // Default value if code is not found
+    );
+    return bloodGroupItem['BLOOD_DESC']!;
+  }
+
+
 
   // Function to get the group description based on the code
   // Function to get the category description based on the code
@@ -158,7 +172,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
               // Profile image at the top center
               Center(
                 child: CircleAvatar(
-                  radius:70,
+                  radius: 70,
                   backgroundImage: _user.memPhoto != null && _user.memPhoto!.isNotEmpty
                       ? MemoryImage(decodeBase64(fixBase64(_user.memPhoto!)) ?? Uint8List(0))
                       : const AssetImage('assets/default_profile.png') as ImageProvider,
@@ -192,19 +206,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
                         _buildReadOnlyTextField('Profession', getProfessionDesc((_user.profCode ?? '').padLeft(4, '0'))),
                       if (_user.designation != null && _user.designation!.isNotEmpty)
                         _buildReadOnlyTextField('Designation', _user.designation!),
-
                       if (_user.officeName != null && _user.officeName!.isNotEmpty)
                         _buildReadOnlyTextField('Office', _user.officeName!),
-
                       if (_user.preEmail != null && _user.preEmail!.isNotEmpty)
                         _buildReadOnlyTextField('Email', _user.preEmail!),
                       if (_user.collRollNo != null && _user.collRollNo!.isNotEmpty)
                         _buildReadOnlyTextField('Roll Number', _user.collRollNo!),
                       if (_user.catCode != null && _user.catCode!.isNotEmpty)
                         _buildReadOnlyTextField('Group', getGroupDesc(_user.catCode ?? '')),
-
-
-
+                      if(_user.bloodGroupCode !=null && _user.bloodGroupCode!.isNotEmpty)
+                        _buildReadOnlyTextField('Blood group', getBloodGroupDesc(_user.bloodGroupCode ??'')),
 
 
 
@@ -223,7 +234,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
                           _buildTab('Present\nAddress'),
                           _buildTab('Per\nAddress'),
                           _buildTab('Office\nAddress'),
-                          _buildTab('Family\nInfo'),  // Added new tab for Family Info
+                          _buildTab('Family\nInfo'), // Added new tab for Family Info
                         ],
                       ),
 
@@ -246,7 +257,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
                             ),
                             _permanentAddressTab(_user.perAddr, _user.perPhone, perDivDesc, perDistDesc, perThanaDesc),
                             _officeAddressTab(_user.offAddr, _user.offPhone, _user.offEmail),
-                            _familyInfoTab(_user.fName, _user.mName),  // Added Family Info Tab view
+                            _familyInfoTab(_user.fName, _user.mName), // Added Family Info Tab view
                           ],
                         ),
                       ),
@@ -258,8 +269,19 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
           ),
         ),
       ),
+
+      // Adding the BottomNavigationBar
+
     );
   }
+
+// Function to handle bottom navigation item taps
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
 
 
 // Method to build the Family Info Tab

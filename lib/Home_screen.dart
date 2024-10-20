@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:typed_data'; // for handling binary data
+import 'logout/log_out.dart';
 
 class User {
   final String memId;
@@ -302,12 +303,35 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
+  // Function to get category description based on category code
+  String getCategoryDescription(String code) {
+    // Check if the code is empty or null and return an empty string
+    if (code.isEmpty) {
+      return '';
+    }
+
+    // Iterate through the list of groups
+    for (var group in group) {
+      // Check if the current group code matches the input code
+      if (group['CAT_CODE'] == code) {
+        // Return the description if available, otherwise return an empty string
+        return group['CAT_DESC'] ?? '';
+      }
+    }
+
+    // Return an empty string if the category is not found
+    return '';
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false, // Prevents the back arrow icon from appearing
           title: const Text(
             'Alapon-NDC90',
             style: TextStyle(
@@ -322,7 +346,27 @@ class _HomeScreenState extends State<HomeScreen> {
               bottom: Radius.circular(20), // Adjust the radius as needed
             ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                LogoutDialog.showLogoutDialog(context); // Call the logout dialog function
+              },
+              child: const Text(
+                'LogOut',
+                style: TextStyle(
+                  color: Color(0xFFE5214E),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              )
+
+            ),
+          ],
         ),
+
+
+
+
         body: Padding(
           padding: const EdgeInsets.all(20.0),
           child: _isLoading
@@ -386,15 +430,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 8.0),
                       child: ListTile(
-                        leading: user.memPhoto != null && user.memPhoto!.isNotEmpty
-                            ? _buildUserAvatar(user.memPhoto!)
-                            : const CircleAvatar(child: Icon(Icons.person)),
+                        leading: Container(
+                          width: 60.0, // Set the desired width
+                          height: 60.0, // Set the desired height
+                          child: user.memPhoto != null && user.memPhoto!.isNotEmpty
+                              ? _buildUserAvatar(user.memPhoto!)
+                              : const CircleAvatar(child: Icon(Icons.person)),
+                        ),
                         title: Text(user.memName),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(user.memMobileNo),
                             Text(getProfessionDescription(user.profCode ?? '')), // Provide a default (empty string) if profCode is null
+                            Text(getCategoryDescription(user.catCode ?? '')),
+
                           ],
                         ),
                         trailing: IconButton(

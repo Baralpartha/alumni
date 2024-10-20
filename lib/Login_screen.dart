@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:alumni/profession_list.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -127,6 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
           String prePostCode = data['user']['pre_post_code'] ??
               'Unknown Present Post Code';
           String memType = data['user']['mem_type'] ?? 'Unknown Member Type';
+          String bloodGroupCode = data['user']['BG'] ?? '';
 
           // Save user data to SharedPreferences
           final pref = await SharedPreferences.getInstance();
@@ -165,6 +167,8 @@ class _LoginScreenState extends State<LoginScreen> {
           await pref.setString("dom", dom);
           await pref.setString("pre_post_code", prePostCode);
           await pref.setString("membertype", memType);
+          await pref.setString("bloodgroup",bloodGroupCode);
+
 
           print('Pre District ================================== ${profCode}');
           print('----------------------------$memPhoto ---------------------------');
