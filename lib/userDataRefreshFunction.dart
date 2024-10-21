@@ -76,6 +76,7 @@ class UserLogin {
           String memType = data['user']['mem_type'] ?? 'Unknown Member Type';
           // Extract and set the BG field
           String bg = data['user']['BG'] ?? 'No Blood Group'; // Use the same format as memType
+          String spouseName = data['user']['spouse_name'] ?? '';
 
 
 
@@ -118,6 +119,7 @@ class UserLogin {
           await pref.setString("pre_post_code", prePostCode);
           await pref.setString("membertype", memType);
           await pref.setString("bg", bg); // Save the BG field
+          await pref.setString("spouseName", spouseName);
 
           // Create a User object with the fetched data
           User loggedInUser = User(

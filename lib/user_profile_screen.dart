@@ -242,7 +242,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
 
                       // TabBarView for showing the different sections
                       Container(
-                        height: 400, // Set a fixed height to prevent overflow
+                        height: MediaQuery.of(context).size.height * 0.8,  // Adjust the height to your need
                         child: TabBarView(
                           controller: _tabController,
                           children: [
@@ -257,10 +257,23 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
                             ),
                             _permanentAddressTab(_user.perAddr, _user.perPhone, perDivDesc, perDistDesc, perThanaDesc),
                             _officeAddressTab(_user.offAddr, _user.offPhone, _user.offEmail),
-                            _familyInfoTab(_user.fName, _user.mName), // Added Family Info Tab view
+                            _familyInfoTab(
+                              _user.fName,
+                              _user.mName,
+                              _user.spouseName,
+                              _user.child1Name,
+                              _user.child1Gender,
+                              _user.child1Dob,
+                              _user.child2Name,
+                              _user.child2Gender,
+                              _user.child3Name,
+                            ), // Added Family Info Tab view
                           ],
                         ),
-                      ),
+                      )
+
+
+
                     ],
                   ),
                 ),
@@ -285,7 +298,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
 
 
 // Method to build the Family Info Tab
-  Widget _familyInfoTab(String? fatherName, String? motherName) {
+  Widget _familyInfoTab(String? fatherName, String? motherName, String?  spouseName, String? child1Name, String? child1Gender,
+      String? child1Dob, String? child2Name, String? child2Gender, String? child3Name,) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -295,6 +309,22 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
             _buildReadOnlyTextField('Father\'s Name', fatherName),
           if (motherName != null && motherName.isNotEmpty)
             _buildReadOnlyTextField('Mother\'s Name', motherName),
+          if ( spouseName!= null &&  spouseName.isNotEmpty)
+            _buildReadOnlyTextField('spouseName', spouseName ),
+          if ( child1Name!= null && child1Name .isNotEmpty)
+            _buildReadOnlyTextField('child1Name', child1Name ),
+          if ( child1Gender!= null && child1Gender .isNotEmpty)
+            _buildReadOnlyTextField('child1Name', child1Gender ),
+          //child2Name
+          if ( child2Name!= null && child2Name .isNotEmpty)
+            _buildReadOnlyTextField('child2Name', child2Name ),
+          //child3Name
+          if ( child3Name!= null && child3Name .isNotEmpty)
+            _buildReadOnlyTextField('child3Name', child3Name ),
+          //child4Name
+
+
+
         ],
       ),
     );

@@ -128,7 +128,8 @@ class _LoginScreenState extends State<LoginScreen> {
           String prePostCode = data['user']['pre_post_code'] ??
               'Unknown Present Post Code';
           String memType = data['user']['mem_type'] ?? 'Unknown Member Type';
-          String bloodGroupCode = data['user']['BG'] ?? '';
+          String bloodGroup = data['user']['BG'] ?? '';
+          String spouseName = data['user']['spouse_name'] ?? '';
 
           // Save user data to SharedPreferences
           final pref = await SharedPreferences.getInstance();
@@ -167,7 +168,9 @@ class _LoginScreenState extends State<LoginScreen> {
           await pref.setString("dom", dom);
           await pref.setString("pre_post_code", prePostCode);
           await pref.setString("membertype", memType);
-          await pref.setString("bloodgroup",bloodGroupCode);
+          await pref.setString("BG", bloodGroup);
+          await pref.setString("spouseName", spouseName);
+
 
 
           print('Pre District ================================== ${profCode}');

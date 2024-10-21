@@ -47,6 +47,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _collrollnameController ;// For member type
   late TextEditingController _bloodGroupController; // For blood group
 
+  //newdata
+  late TextEditingController _spouseNameController;
+
+
 
 
 
@@ -91,11 +95,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? dom = ""; // Added for date of membership
   String? prePostCode = ""; // Added for present post code
   String? memType = ""; // Added for member type
+  String? spouseName ="";
 // Added for designation
 
   String? selectedProfession;
   String? selectedGroup;
   String? selectedbloodGroup;
+
   //String? selectedCategory;
 
   String? phone;
@@ -139,6 +145,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _memTypeController = TextEditingController(text: widget.user.memType ?? '');
     _collrollnameController = TextEditingController(text: widget.user.collRollNo ?? '');
     _bloodGroupController = TextEditingController(text: widget.user.bloodGroupCode ?? '');
+    //newdata
+    _spouseNameController = TextEditingController(text: widget.user.spouseName ?? '');
+
 
 
   }
@@ -182,6 +191,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       dom = prefs.getString("dom") ?? ''; // Added for date of membership
       prePostCode = prefs.getString("pre_post_code") ?? ''; // Added for present post code
       memType = prefs.getString("membertype") ?? ''; // Added for member type
+
+      //newdata
+      spouseName = prefs.getString("spouseName") ?? '';
+      selectedbloodGroup =prefs.getString("bloodGroup") ??'';
+
 
 
       selectedProfession = (profCode ?? '').padLeft(4, '0'); // Set selectedProfession to profCode
@@ -263,6 +277,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       'mem_type': _memTypeController.text,
       'collRoll_Num': _collrollnameController.text,
       'bloodGroup': _bloodGroupController.text,
+      //newdata
+      'spouseName': _spouseNameController.text,
+
+
+
 
     };
 
@@ -540,9 +559,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         }),
 
 
-
-
-
+                        _buildDropdownProf('BloodGroup', selectedbloodGroup, bloodGroup, (value) {
+                          setState(() {
+                            selectedbloodGroup = value;
+                            print("---------------------------Selected Profession: $selectedbloodGroup");
+                          });
+                        }),
 
                         _buildTextField(_collrollnameController, 'Roll Number', usercollrollname),
 
@@ -633,7 +655,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           ],
                         ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 30),
 
                         // Tab view for addresses and family info
                         SizedBox(
@@ -725,6 +747,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     children: [
                                       _buildTextField(_fNameController, 'Father\'s Name', fathername),
                                       _buildTextField(_mNameController, 'Mother\'s Name', mothername),
+                                      _buildTextField(_spouseNameController, 'Spouse Name', spouseName),
+
                                     ],
                                   ),
                                 ),

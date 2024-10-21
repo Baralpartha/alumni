@@ -44,6 +44,25 @@ class User {
   final String? perDiv;
   final String? memType;
   final String? bloodGroupCode;
+  final String? spouseName;
+  final String? spouseDob;
+  final String? spouseProf;
+
+  final String? child1Name;
+  final String? child1Gender;
+  final String? child1Dob;
+
+  final String? child2Name;
+  final String? child2Gender;
+  final String? child2Dob;
+
+  final String? child3Name;
+  final String? child3Gender;
+  final String? child3Dob;
+
+  final String? child4Name;
+  final String? child4Gender;
+  final String? child4Dob;
 
   User({
     required this.memId,
@@ -79,6 +98,23 @@ class User {
     this.perDiv,
     this.memType,
     this.bloodGroupCode,
+
+    //New fild
+    this.spouseName,
+    this.spouseDob,
+    this.spouseProf,
+    this.child1Name,
+    this.child1Gender,
+    this.child1Dob,
+    this.child2Name,
+    this.child2Gender,
+    this.child2Dob,
+    this.child3Name,
+    this.child3Gender,
+    this.child3Dob,
+    this.child4Name,
+    this.child4Gender,
+    this.child4Dob,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -116,6 +152,26 @@ class User {
       perDiv: json['PER_DIV'],
       memType: json['MEM_TYPE'],
       bloodGroupCode: json['BG'],
+
+
+
+      //new field
+      spouseName: json['SPOUSE_NAME'],
+      spouseDob: json['SPOUSE_DOB'],
+      spouseProf: json['SPOUSE_PROF'],
+      child1Name: json['CHIELD1_NAME'],
+      child1Gender: json['CHIELD1_GENDER'],
+      child1Dob: json['CHIELD1_DOB'],
+      child2Name: json['CHIELD2_NAME'],
+      child2Gender: json['CHIELD2_GENDER'],
+      child2Dob: json['CHIELD2_DOB'],
+      child3Name: json['CHIELD3_NAME'],
+      child3Gender: json['CHIELD3_GENDER'],
+      child3Dob: json['CHIELD3_DOB'],
+      child4Name: json['CHIELD4_NAME'],
+      child4Gender: json['CHIELD4_GENDER'],
+      child4Dob: json['CHIELD4_DOB'],
+
     );
   }
 }
