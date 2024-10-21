@@ -538,19 +538,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             print("---------------------------Selected Profession: $selectedGroup");
                           });
                         }),
-                        _buildDropdownProf('Group', selectedGroup, group, (value) {
-                          setState(() {
-                            selectedGroup = value;
-                            print("---------------------------Selected Profession: $selectedGroup");
-                          });
-                        }),
 
-                        _buildDropdownProf('Group', selectedbloodGroup, group, (value) {
-                          setState(() {
-                            selectedbloodGroup = value;
-                            print("---------------------------Selected Profession: $selectedbloodGroup");
-                          });
-                        }),
+
 
 
 
