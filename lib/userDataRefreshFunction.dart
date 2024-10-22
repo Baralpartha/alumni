@@ -79,6 +79,24 @@ class UserLogin {
           String spouseName = data['user']['spouse_name'] ?? '';
 
 
+          // Children details
+          String child1Name = data['user']['CHIELD1_NAME'] ?? '';
+          String child1Gender = data['user']['CHIELD1_GENDER'] ?? '';
+          String child1Dob = data['user']['CHIELD1_DOB'] ?? '';
+
+          String child2Name = data['user']['CHIELD2_NAME'] ?? '';
+          String child2Gender = data['user']['CHIELD2_GENDER'] ?? '';
+          String child2Dob = data['user']['CHIELD2_DOB'] ?? '';
+
+          String child3Name = data['user']['CHIELD3_NAME'] ?? '';
+          String child3Gender = data['user']['CHIELD3_GENDER'] ?? '';
+          String child3Dob = data['user']['CHIELD3_DOB'] ?? '';
+
+          String child4Name = data['user']['CHIELD4_NAME'] ?? '';
+          String child4Gender = data['user']['CHIELD4_GENDER'] ?? '';
+          String child4Dob = data['user']['CHIELD4_DOB'] ?? '';
+
+
 
           // Save user data to SharedPreferences
           final pref = await SharedPreferences.getInstance();
@@ -120,6 +138,26 @@ class UserLogin {
           await pref.setString("membertype", memType);
           await pref.setString("bg", bg); // Save the BG field
           await pref.setString("spouseName", spouseName);
+
+
+
+
+          // Storing child information in SharedPreferences
+          await pref.setString("child1Name", child1Name);
+          await pref.setString("child1Gender", child1Gender);
+          await pref.setString("child1Dob", child1Dob);
+
+          await pref.setString("child2Name", child2Name);
+          await pref.setString("child2Gender", child2Gender);
+          await pref.setString("child2Dob", child2Dob);
+
+          await pref.setString("child3Name", child3Name);
+          await pref.setString("child3Gender", child3Gender);
+          await pref.setString("child3Dob", child3Dob);
+
+          await pref.setString("child4Name", child4Name);
+          await pref.setString("child4Gender", child4Gender);
+          await pref.setString("child4Dob", child4Dob);
 
           // Create a User object with the fetched data
           User loggedInUser = User(

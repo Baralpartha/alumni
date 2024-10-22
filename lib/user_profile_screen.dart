@@ -151,7 +151,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
           "Alapon-NDC90",
           style: TextStyle(
             fontSize: 20,
-            color: Colors.white,
+            color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
         ),

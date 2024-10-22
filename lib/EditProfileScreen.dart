@@ -301,13 +301,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       return;
     }
 
-    // Convert image to Base64 string if an image is picked
-    if (_pickedImage != null) {
-      final bytes = await _pickedImage!.readAsBytes();
-      setState(() {
-        memPhotoBase64 = base64Encode(bytes);
-      });
-    }
+
 
     // Construct the updated user data
     final updatedUserData = {
@@ -611,7 +605,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             backgroundImage: _pickedImage != null
                                 ? FileImage(_pickedImage!) // Show picked image
                                 : (usermemphoto != null && usermemphoto!.isNotEmpty
-                                ? MemoryImage(decodeBase64(fixBase64(usermemphoto!)) ?? Uint8List(0)) // Show memory image
+                                ? NetworkImage(usermemphoto!) // Show image from server
                                 : const AssetImage('assets/default_profile.png')) as ImageProvider, // Show default image if none selected
                           ),
                         ),
@@ -737,7 +731,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           ],
                         ),
 
-                        const SizedBox(height: 30),
+                        const SizedBox(height:10),
 
                         // Tab view for addresses and family info
                         SizedBox(
@@ -833,20 +827,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                       _buildTextField(_spouseProfController, 'Spouse Profession',spouseProf),
 
                                       _buildTextField(_child1NameController, 'Child 1 Name', child1Name),
-                                      _buildTextField(_child1GenderController, 'Child 1 Gender',child1Gender),
-                                      _buildTextField(_child1DobController, 'Child 1 DOB',child1Dob),
+                                      _buildTextField(_child1GenderController, ' Gender',child1Gender),
+                                      _buildTextField(_child1DobController, 'Date of Birth',child1Dob),
 
                                       _buildTextField(_child2NameController, 'Child 2 Name',child2Name),
-                                      _buildTextField(_child2GenderController, 'Child 2 Gender',child2Gender),
-                                      _buildTextField(_child2DobController, 'Child 2 DOB', child2Dob),
+                                      _buildTextField(_child2GenderController, 'Gender',child2Gender),
+                                      _buildTextField(_child2DobController, 'Date of Birth', child2Dob),
 
                                       _buildTextField(_child3NameController, 'Child 3 Name', child3Name),
-                                      _buildTextField(_child3GenderController, 'Child 3 Gender',child3Gender),
-                                      _buildTextField(_child3DobController, 'Child 3 DOB',child3Dob),
+                                      _buildTextField(_child3GenderController, 'Gender',child3Gender),
+                                      _buildTextField(_child3DobController, 'Date of Birth',child3Dob),
 
                                       _buildTextField(_child4NameController, 'Child 4 Name',child4Name),
-                                      _buildTextField(_child4GenderController, 'Child 4 Gender',child4Gender),
-                                      _buildTextField(_child4DobController, 'Child 4 DOB',child4Dob),
+                                      _buildTextField(_child4GenderController, 'Gender',child4Gender),
+                                      _buildTextField(_child4DobController, 'Date of Birth',child4Dob),
 
 
 
@@ -865,7 +859,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
               // Save Button fixed at the bottom
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(10.0),
                 child: _isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
@@ -879,10 +873,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
     );
   }
-
-
-
-
 
 
 
