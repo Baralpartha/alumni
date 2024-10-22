@@ -143,7 +143,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
 
 
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -242,7 +241,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
 
                       // TabBarView for showing the different sections
                       Container(
-                        height: MediaQuery.of(context).size.height * 0.8,  // Adjust the height to your need
+                        height: MediaQuery.of(context).size.height * 1.0,  // Adjust the height to your need
                         child: TabBarView(
                           controller: _tabController,
                           children: [
@@ -258,15 +257,21 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
                             _permanentAddressTab(_user.perAddr, _user.perPhone, perDivDesc, perDistDesc, perThanaDesc),
                             _officeAddressTab(_user.offAddr, _user.offPhone, _user.offEmail),
                             _familyInfoTab(
-                              _user.fName,
-                              _user.mName,
-                              _user.spouseName,
-                              _user.child1Name,
-                              _user.child1Gender,
-                              _user.child1Dob,
-                              _user.child2Name,
-                              _user.child2Gender,
-                              _user.child3Name,
+                                _user.fName,
+                                _user.mName,
+                                _user.spouseName,
+                                _user.child1Name,
+                                _user.child1Gender,
+                                _user.child1Dob,
+                                _user.child2Name,
+                                _user.child2Gender,
+                                _user.child3Name,
+                                _user.child3Gender,
+                                _user.child3Dob,
+                                _user.child4Name,
+                                _user.child4Gender,
+                                _user.child4Dob,
+                                _user.child2Dob,
                             ), // Added Family Info Tab view
                           ],
                         ),
@@ -299,7 +304,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
 
 // Method to build the Family Info Tab
   Widget _familyInfoTab(String? fatherName, String? motherName, String?  spouseName, String? child1Name, String? child1Gender,
-      String? child1Dob, String? child2Name, String? child2Gender, String? child3Name,) {
+      String? child1Dob, String? child2Name, String? child2Gender, String? child3Name, String? child3Gender,
+      String?child3Dob, String? child4Name, String? child4Gender, String? child4Dob, String? child2Dob,) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -314,13 +320,32 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
           if ( child1Name!= null && child1Name .isNotEmpty)
             _buildReadOnlyTextField('child1Name', child1Name ),
           if ( child1Gender!= null && child1Gender .isNotEmpty)
-            _buildReadOnlyTextField('child1Name', child1Gender ),
+            _buildReadOnlyTextField(' Gender', child1Gender ),
+          if ( child1Dob!= null && child1Dob .isNotEmpty)
+            _buildReadOnlyTextField(' Gender',child1Dob ),
           //child2Name
           if ( child2Name!= null && child2Name .isNotEmpty)
             _buildReadOnlyTextField('child2Name', child2Name ),
+          if ( child2Gender!= null && child2Gender .isNotEmpty)
+            _buildReadOnlyTextField('Gender', child2Gender ),
+          if ( child2Dob!= null && child2Dob .isNotEmpty)
+            _buildReadOnlyTextField('Date of Birth', child2Dob ),
+
           //child3Name
           if ( child3Name!= null && child3Name .isNotEmpty)
             _buildReadOnlyTextField('child3Name', child3Name ),
+          if ( child3Gender!= null && child3Gender .isNotEmpty)
+            _buildReadOnlyTextField('Gender', child3Gender),
+          if ( child3Dob!= null && child3Dob .isNotEmpty)
+            _buildReadOnlyTextField('Date of Birth', child3Dob),
+          //child4Name
+          if ( child4Name!= null && child4Name .isNotEmpty)
+            _buildReadOnlyTextField('child3Name', child4Name),
+          if ( child4Gender!= null && child4Gender.isNotEmpty)
+            _buildReadOnlyTextField('Gender', child4Gender),
+          if ( child4Dob!= null && child4Dob.isNotEmpty)
+            _buildReadOnlyTextField('Date of Birth',child4Dob),
+
           //child4Name
 
 

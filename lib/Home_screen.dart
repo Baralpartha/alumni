@@ -1,4 +1,5 @@
 import 'package:alumni/profession_list.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'user_profile_screen.dart';
 import 'login_screen.dart';
@@ -379,6 +380,16 @@ class _HomeScreenState extends State<HomeScreen> {
     return '';
   }
 
+  // Helper method to get blood group description based on code
+  String getBloodGroupDescription(String code) {
+    for (var blood in bloodGroup) {
+      if (blood['BLOOD_CODE'] == code) {
+        return blood['BLOOD_DESC'] ?? ''; // Return empty string if description is null
+      }
+    }
+    return ''; // Return empty string if blood group is not found
+  }
+
 
 
   @override
@@ -460,7 +471,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.filter_list),
                           onPressed: () {
-                            // Show the filter options when the icon is clicked
                             _showFilterOptions(context);
                           },
                         ),
@@ -487,20 +497,47 @@ class _HomeScreenState extends State<HomeScreen> {
                       margin: const EdgeInsets.symmetric(vertical: 8.0),
                       child: ListTile(
                         leading: Container(
-                          width: 60.0, // Set the desired width
+                          width: 50.0, // Set the desired width
                           height: 60.0, // Set the desired height
                           child: user.memPhoto != null && user.memPhoto!.isNotEmpty
                               ? _buildUserAvatar(user.memPhoto!)
                               : const CircleAvatar(child: Icon(Icons.person)),
                         ),
-                        title: Text(user.memName),
+                        title: Row(
+                          children: [
+                            Expanded(
+                              child: AutoSizeText(
+                                user.memName, // Display user name
+                                style: TextStyle(
+                                  fontSize: 18, // Base font size
+                                  color: Colors.blue, // Name color
+                                ),
+                                maxLines: 1, // Ensure the name stays on one line
+                                minFontSize: 12, // Auto adjust font size if the name is too long
+                                overflow: TextOverflow.ellipsis, // Handle overflow for long names
+                              ),
+                            ),
+                          ],
+                        ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(user.memMobileNo),
-                            Text(getProfessionDescription(user.profCode ?? '')), // Provide a default (empty string) if profCode is null
-                            Text(getCategoryDescription(user.catCode ?? '')),
-
+                            Text(
+                              user.memMobileNo, // Display mobile number
+                              style: TextStyle(
+                                fontSize: 16, // Font size for the number
+                                color: Colors.green, // Mobile number color
+                              ),
+                            ),
+                            Text(getProfessionDescription(user.profCode ?? '')), // Profession description
+                            Text(getCategoryDescription(user.catCode ?? '')), // Category description
+                            Text(
+                              getBloodGroupDescription(user.bloodGroupCode ?? ''),
+                              style: TextStyle(
+                                fontSize: 16, // Font size for the blood group
+                                color: Colors.red, // Set text color to red
+                              ),
+                            ),
                           ],
                         ),
                         trailing: IconButton(
@@ -524,14 +561,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                       ),
                     );
+
                   },
                 ),
-              )
-
-
+              ),
             ],
           ),
         ),
+
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _currentIndex,
           items: const [
