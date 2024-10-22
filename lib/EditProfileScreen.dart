@@ -48,7 +48,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _bloodGroupController; // For blood group
 
   //newdata
+  // Define the controllers
   late TextEditingController _spouseNameController;
+  late TextEditingController _spouseDobController;
+  late TextEditingController _spouseProfController;
+
+  late TextEditingController _child1NameController;
+  late TextEditingController _child1GenderController;
+  late TextEditingController _child1DobController;
+
+  late TextEditingController _child2NameController;
+  late TextEditingController _child2GenderController;
+  late TextEditingController _child2DobController;
+
+  late TextEditingController _child3NameController;
+  late TextEditingController _child3GenderController;
+  late TextEditingController _child3DobController;
+
+  late TextEditingController _child4NameController;
+  late TextEditingController _child4GenderController;
+  late TextEditingController _child4DobController;
 
 
 
@@ -98,6 +117,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? spouseName ="";
 // Added for designation
 
+  // Declare nullable String variables
+  String? spouseDob = "";
+  String? spouseProf = "";
+
+  String? child1Name = "";
+  String? child1Gender = "";
+  String? child1Dob = "";
+
+  String? child2Name = "";
+  String? child2Gender = "";
+  String? child2Dob = "";
+
+  String? child3Name = "";
+  String? child3Gender = "";
+  String? child3Dob = "";
+
+  String? child4Name = "";
+  String? child4Gender = "";
+  String? child4Dob = "";
+
   String? selectedProfession;
   String? selectedGroup;
   String? selectedbloodGroup;
@@ -146,8 +185,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _collrollnameController = TextEditingController(text: widget.user.collRollNo ?? '');
     _bloodGroupController = TextEditingController(text: widget.user.bloodGroupCode ?? '');
     //newdata
+    // Initialize the TextEditingControllers with data from the widget
     _spouseNameController = TextEditingController(text: widget.user.spouseName ?? '');
+    _spouseDobController = TextEditingController(text: widget.user.spouseDob ?? '');
+    _spouseProfController = TextEditingController(text: widget.user.spouseProf ?? '');
 
+    _child1NameController = TextEditingController(text: widget.user.child1Name ?? '');
+    _child1GenderController = TextEditingController(text: widget.user.child1Gender ?? '');
+    _child1DobController = TextEditingController(text: widget.user.child1Dob ?? '');
+
+    _child2NameController = TextEditingController(text: widget.user.child2Name ?? '');
+    _child2GenderController = TextEditingController(text: widget.user.child2Gender ?? '');
+    _child2DobController = TextEditingController(text: widget.user.child2Dob ?? '');
+
+    _child3NameController = TextEditingController(text: widget.user.child3Name ?? '');
+    _child3GenderController = TextEditingController(text: widget.user.child3Gender ?? '');
+    _child3DobController = TextEditingController(text: widget.user.child3Dob ?? '');
+
+    _child4NameController = TextEditingController(text: widget.user.child4Name ?? '');
+    _child4GenderController = TextEditingController(text: widget.user.child4Gender ?? '');
+    _child4DobController = TextEditingController(text: widget.user.child4Dob ?? '');
 
 
   }
@@ -191,12 +248,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       dom = prefs.getString("dom") ?? ''; // Added for date of membership
       prePostCode = prefs.getString("pre_post_code") ?? ''; // Added for present post code
       memType = prefs.getString("membertype") ?? ''; // Added for member type
-
       //newdata
+      // Fetching child information with a similar format
       spouseName = prefs.getString("spouseName") ?? '';
-      selectedbloodGroup =prefs.getString("bloodGroup") ??'';
+       child1Name = prefs.getString("child1Name") ?? '';
+      child1Gender = prefs.getString("child1Gender") ?? '';
+       child1Dob = prefs.getString("child1Dob") ?? '';
 
+       child2Name = prefs.getString("child2Name") ?? '';
+       child2Gender = prefs.getString("child2Gender") ?? '';
+       child2Dob = prefs.getString("child2Dob") ?? '';
 
+       child3Name = prefs.getString("child3Name") ?? '';
+       child3Gender = prefs.getString("child3Gender") ?? '';
+       child3Dob = prefs.getString("child3Dob") ?? '';
+
+       child4Name = prefs.getString("child4Name") ?? '';
+       child4Gender = prefs.getString("child4Gender") ?? '';
+       child4Dob = prefs.getString("child4Dob") ?? '';
 
       selectedProfession = (profCode ?? '').padLeft(4, '0'); // Set selectedProfession to profCode
       selectedGroup = catCode;
@@ -279,9 +348,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       'bloodGroup': _bloodGroupController.text,
       //newdata
       'spouseName': _spouseNameController.text,
+      'spouseDob': _spouseDobController.text,
+      'spouseProf': _spouseProfController.text,
+      'child1Name': _child1NameController.text,
+      'child1Gender': _child1GenderController.text,
+      'child1Dob': _child1DobController.text,
 
+      'child2Name': _child2NameController.text,
+      'child2Gender': _child2GenderController.text,
+      'child2Dob': _child2DobController.text,
 
-
+      'child3Name': _child3NameController.text,
+      'child3Gender': _child3GenderController.text,
+      'child3Dob': _child3DobController.text,
+      'child4Name': _child4NameController.text,
+      'child4Gender': _child4GenderController.text,
+      'child4Dob': _child4DobController.text,
 
     };
 
@@ -559,12 +641,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         }),
 
 
-                        _buildDropdownProf('BloodGroup', selectedbloodGroup, bloodGroup, (value) {
-                          setState(() {
-                            selectedbloodGroup = value;
-                            print("---------------------------Selected Profession: $selectedbloodGroup");
-                          });
-                        }),
+                        //_buildDropdownProf('BloodGroup', selectedbloodGroup, bloodGroup, (value) {
+                          //setState(() {
+                            //selectedbloodGroup = value;
+                            //print("---------------------------Selected Profession: $selectedbloodGroup");
+                          //});
+                        //}),
 
                         _buildTextField(_collrollnameController, 'Roll Number', usercollrollname),
 
@@ -748,6 +830,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                       _buildTextField(_fNameController, 'Father\'s Name', fathername),
                                       _buildTextField(_mNameController, 'Mother\'s Name', mothername),
                                       _buildTextField(_spouseNameController, 'Spouse Name', spouseName),
+                                      _buildTextField(_spouseProfController, 'Spouse Profession',spouseProf),
+
+                                      _buildTextField(_child1NameController, 'Child 1 Name', child1Name),
+                                      _buildTextField(_child1GenderController, 'Child 1 Gender',child1Gender),
+                                      _buildTextField(_child1DobController, 'Child 1 DOB',child1Dob),
+
+                                      _buildTextField(_child2NameController, 'Child 2 Name',child2Name),
+                                      _buildTextField(_child2GenderController, 'Child 2 Gender',child2Gender),
+                                      _buildTextField(_child2DobController, 'Child 2 DOB', child2Dob),
+
+                                      _buildTextField(_child3NameController, 'Child 3 Name', child3Name),
+                                      _buildTextField(_child3GenderController, 'Child 3 Gender',child3Gender),
+                                      _buildTextField(_child3DobController, 'Child 3 DOB',child3Dob),
+
+                                      _buildTextField(_child4NameController, 'Child 4 Name',child4Name),
+                                      _buildTextField(_child4GenderController, 'Child 4 Gender',child4Gender),
+                                      _buildTextField(_child4DobController, 'Child 4 DOB',child4Dob),
+
+
 
                                     ],
                                   ),
