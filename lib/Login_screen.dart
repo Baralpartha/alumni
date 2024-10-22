@@ -130,6 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
           String memType = data['user']['mem_type'] ?? 'Unknown Member Type';
           String bloodGroup = data['user']['BG'] ?? '';
           String spouseName = data['user']['spouse_name'] ?? '';
+          String spouseProf = data['user']['SPOUSE_PROF'] ?? '';
 
 
           // Children details
@@ -188,6 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
           await pref.setString("membertype", memType);
           await pref.setString("BG", bloodGroup);
           await pref.setString("spouseName", spouseName);
+          await pref.setString("spouseProf", spouseProf);
 
           // Storing child information in SharedPreferences
           await pref.setString("child1Name", child1Name);

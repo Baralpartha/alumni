@@ -251,6 +251,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       //newdata
       // Fetching child information with a similar format
       spouseName = prefs.getString("spouseName") ?? '';
+      spouseProf = prefs.getString("spouseProf") ?? '';
        child1Name = prefs.getString("child1Name") ?? '';
       child1Gender = prefs.getString("child1Gender") ?? '';
        child1Dob = prefs.getString("child1Dob") ?? '';
@@ -269,7 +270,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       selectedProfession = (profCode ?? '').padLeft(4, '0'); // Set selectedProfession to profCode
       selectedGroup = catCode;
-      selectedbloodGroup =catCode;
+      selectedbloodGroup = prefs.getString("BG") ?? '';
     });
 
     print('---------------------$usermemphoto-----------------------');
@@ -339,11 +340,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       'pre_post_code': _prePostCodeController.text,
       'mem_type': _memTypeController.text,
       'collRoll_Num': _collrollnameController.text,
-      'bloodGroup': _bloodGroupController.text,
+      'bg': selectedbloodGroup,
       //newdata
       'spouseName': _spouseNameController.text,
       'spouseDob': _spouseDobController.text,
-      'spouseProf': _spouseProfController.text,
+      'spouseProf': spouseProf,
       'child1Name': _child1NameController.text,
       'child1Gender': _child1GenderController.text,
       'child1Dob': _child1DobController.text,
@@ -416,14 +417,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
 
-// Function to encode image to Base64
-  Future<String> _encodeImageToBase64(File image) async {
-    // Read the image file as bytes
-    Uint8List imageBytes = await image.readAsBytes();
-    // Encode the bytes to Base64
-    String base64String = base64Encode(imageBytes);
-    return base64String; // Return the encoded string
-  }
+
 
 // Function to decode Base64 to image (optional, for display purposes)
   Uint8List? _decodeBase64(String? base64String) {
@@ -635,12 +629,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         }),
 
 
-                        //_buildDropdownProf('BloodGroup', selectedbloodGroup, bloodGroup, (value) {
-                          //setState(() {
-                            //selectedbloodGroup = value;
-                            //print("---------------------------Selected Profession: $selectedbloodGroup");
-                          //});
-                        //}),
+                        _buildDropdownProf('BloodGroup', selectedbloodGroup, bloodGroup, (value) {
+                          setState(() {
+                            selectedbloodGroup = value;
+                            print("---------------------------Selected Profession: $selectedbloodGroup");
+                          });
+                        }),
 
                         _buildTextField(_collrollnameController, 'Roll Number', usercollrollname),
 
@@ -744,6 +738,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 child: SingleChildScrollView(
                                   child: Column(
                                     children: [
+                                      SizedBox(height: 5,),
                                       _buildTextField(_preAddrController, ' Address', presentAddress),
                                       _buildTextField(_prePhoneController, ' Phone', presentPhone),
                                       _buildTextField(_preEmailController, 'Email', presentEmail),
@@ -776,6 +771,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 child: SingleChildScrollView(
                                   child: Column(
                                     children: [
+                                      SizedBox(height: 5,),
                                       _buildTextField(_perAddrController, ' Address', permanentAddress),
                                       _buildTextField(_perPhoneController, ' Phone', permanentPhone),
                                       _buildTextField(_perEmailController, ' Email', permanentEmail),
@@ -807,7 +803,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 child: SingleChildScrollView(
                                   child: Column(
                                     children: [
-
+                                      SizedBox(height: 5,),
                                       _buildTextField(_offPhoneController, ' Phone', officePhone),
                                       _buildTextField(_offEmailController, 'Email' , officeEmail),
                                     ],
@@ -821,10 +817,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 child: SingleChildScrollView(
                                   child: Column(
                                     children: [
+                                      SizedBox(height: 5,),
                                       _buildTextField(_fNameController, 'Father\'s Name', fathername),
                                       _buildTextField(_mNameController, 'Mother\'s Name', mothername),
                                       _buildTextField(_spouseNameController, 'Spouse Name', spouseName),
-                                      _buildTextField(_spouseProfController, 'Spouse Profession',spouseProf),
+                                      // _buildDropdownProf('Spouse Profession', spouseProf, professions, (value) {
+                                      //   setState(() {
+                                      //     spouseProf = value;
+                                      //     print("---------------------------Selected Profession: $spouseProf");
+                                      //   });
+                                      // }),
 
                                       _buildTextField(_child1NameController, 'Child 1 Name', child1Name),
                                       _buildTextField(_child1GenderController, ' Gender',child1Gender),
@@ -954,8 +956,8 @@ Widget _buildDropdownProf(String label, String? selectedValue, List<dynamic> ite
       ),
       items: items.map<DropdownMenuItem<String>>((item) {
         // Handle nulls safely
-        final value = item['DIV_CODE'] ?? item['DIST_CODE'] ?? item['THANA_CODE'] ?? item['PROF_CODE'] ?? item['CAT_CODE'];
-        final description = item['DIV_DESC'] ?? item['DIST_DESC'] ?? item['THANA_DESC'] ?? item['PROF_DESC'] ?? item['CAT_DESC'];
+        final value = item['DIV_CODE'] ?? item['DIST_CODE'] ?? item['THANA_CODE'] ?? item['PROF_CODE'] ?? item['CAT_CODE'] ?? item['BLOOD_CODE'];
+        final description = item['DIV_DESC'] ?? item['DIST_DESC'] ?? item['THANA_DESC'] ?? item['PROF_DESC'] ?? item['CAT_DESC'] ?? item['BLOOD_DESC'];
 
         return DropdownMenuItem<String>(
           value: value, // This can be null if no code is found
